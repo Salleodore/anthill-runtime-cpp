@@ -9,6 +9,13 @@
 #include <string>
 #include <regex>
 
+#if defined( WIN32 ) || defined( _WIN32 )
+    //
+#else
+    #include <sys/types.h>
+    #include <dirent.h>
+#endif
+
 namespace online
 {
 	Credential::Credential(const std::string& raw)
@@ -138,6 +145,55 @@ namespace online
 			return os.str();
 		}
 	}
+ 
+    bool list_files_in_directory(const std::string& directory, std::list<std::string>& files, std::function<bool(const std::string&)> predicate)
+    {
+#if defined( WIN32 ) || defined( _WIN32 )
+        std::string search_path = directory + "/*.*";
+        WIN32_FIND_DATA fd;
+        HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
+        
+        if(hFind != INVALID_HANDLE_VALUE)
+        {
+            do
+            {
+                // read all (real) files in current folder
+                // , delete '!' read other 2 default folder . and ..
+                if(! (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
+                {
+                    std::string filename = fd.cFileName;
+                    if (!predicate || predicate(filename))
+                    {
+                        files.push_back(predicate);
+                    }
+                }
+            }while(::FindNextFile(hFind, &fd));
+            ::FindClose(hFind);
+            return true;
+        }
+        
+        return false;
+#else
+        DIR *dp;
+        struct dirent *dirp;
+        if((dp  = opendir(directory.c_str())) == NULL)
+        {
+            return false;
+        }
+
+        while ((dirp = readdir(dp)) != NULL)
+        {
+            std::string filename = std::string(dirp->d_name);
+            if (!predicate || predicate(filename))
+            {
+                files.push_back(filename);
+            }
+        }
+
+        closedir(dp);
+        return true;
+#endif
+    }
 
 	void _assert(const std::string& expr_str, bool expr, const std::string& file, int line, const std::string& msg)
 	{

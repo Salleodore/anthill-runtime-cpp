@@ -10,13 +10,21 @@
 #include <json/value.h>
 #include "DiscoveryService.h"
 
+#include <string>
+#include <list>
+#include <functional>
+
 #include <uWS.h>
 
 namespace online
 {
 	typedef std::shared_ptr< class ExecService > ExecServicePtr;
+    
 	typedef std::shared_ptr< class ExecSession > ExecSessionPtr;
-	typedef std::weak_ptr< class ExecSession > ExecSessionWPtr;
+    typedef std::shared_ptr< class ExecDebugSession > ExecDebugSessionPtr;
+    
+    typedef std::weak_ptr< class ExecSession > ExecSessionWPtr;
+    typedef std::weak_ptr< class ExecDebugSession > ExecDebugSessionWPtr;
 
 	class AnthillRuntime;
 	class ExecService;
@@ -31,7 +39,7 @@ namespace online
 		typedef std::function< void(int code, const std::string& reason) > SessionClosedCallback;
         
     public:
-        ExecSession(const std::string& location);
+        ExecSession(const std::string& location, const std::string& mode = "session");
         
     public:
         static ExecSessionPtr Create(const std::string& location);
@@ -48,9 +56,32 @@ namespace online
         
         bool isActive() const;
         
-    private:
+    protected:
         WebsocketRPCPtr m_sockets;
         std::string m_location;
+        std::string m_mode;
+    };
+    
+    class ExecDebugSession: public ExecSession
+    {
+    public:
+        typedef std::function< void(bool success) > DebugStartCallback;
+        typedef std::function< void(const std::string& message) > LogCallback;
+        
+    public:
+        static ExecDebugSessionPtr Create(const std::string& location, LogCallback logCallback, const std::string& scriptsDirectory);
+        ExecDebugSession(const std::string& location, LogCallback logCallback, const std::string& scriptsDirectory);
+        
+    public:
+        void startDebugging(DebugStartCallback callback);
+        void eval(const std::string& text, std::function<void(bool success, const std::string& result)> callback);
+        
+    private:
+        void uploadFiles(std::function<void(bool success)> uploadCallback);
+    
+    private:
+        std::string m_scriptsDirectory;
+        std::list<std::string> m_filesToUpload;
     };
 
 	class ExecService : public Service
@@ -74,6 +105,12 @@ namespace online
         // Opens a new session instead of just calling a method
         // Please note this shared pointer should be stored somewhere, or the session will be terminated
         ExecSessionPtr session();
+        
+        // Opens a new debug session
+        // logCallback will be called for each log() call on the js side
+        // scriptsDirectory is a directory fist js scripts to upload for debugging
+        // Please note this shared pointer should be stored somewhere, or the session will be terminated
+        ExecDebugSessionPtr debugSession(ExecDebugSession::LogCallback logCallback, const std::string& scriptsDirectory);
 
 	protected:
 		ExecService(const std::string& location);

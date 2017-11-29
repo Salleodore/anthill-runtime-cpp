@@ -2,17 +2,16 @@
 project(Anthill)
 set(CURL_MIN_VERSION "7.28.0")
 
+add_directory(. ROOT)
 add_directory(src SRCS)
-add_directory(include INCL)
+add_directory(include INCLUDE)
 include_directories(include)
-
-source_group("Include" FILES ${INCL})
 
 # Add definitions
 add_definitions(-DBUILD_LIBRARY)
 
 # The library itself
-add_library(AnthillRuntime STATIC ${SRCS})
+add_library(AnthillRuntime STATIC ${ROOT})
 
 if( APPLE )
 	set( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++" )

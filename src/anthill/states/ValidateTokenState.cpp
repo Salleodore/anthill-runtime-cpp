@@ -33,9 +33,9 @@ namespace online
 			if (request.isSuccessful())
 			{
                 const ApplicationInfo& applicationInfo = AnthillRuntime::Instance().getApplicationInfo();
-
+                
                 // check if the requiredScopes are satisfied
-                if (std::includes(scopes.begin(), scopes.end(), applicationInfo.requiredScopes.begin(), applicationInfo.requiredScopes.end()))
+                if (std::includes(scopes.begin(), scopes.end(), applicationInfo.shouldHaveScopes.begin(), applicationInfo.shouldHaveScopes.end()))
                 {
                     Log::get() << "Access token is valid!" << std::endl;
 
@@ -52,7 +52,19 @@ namespace online
 			}
    
             Log::get() << "Access token is invalid!" << std::endl;
-
+            
+            for (const std::string& scope: scopes)
+            {
+                Log::get() << "Scope: " << scope << std::endl;
+            }
+            
+            const ApplicationInfo& applicationInfo = AnthillRuntime::Instance().getApplicationInfo();
+            
+            for (const std::string& scope: applicationInfo.shouldHaveScopes)
+            {
+                Log::get() << "Should have: " << scope << std::endl;
+            }
+            
             AnthillRuntime& online = AnthillRuntime::Instance();
             StoragePtr storage = online.getStorage();
 

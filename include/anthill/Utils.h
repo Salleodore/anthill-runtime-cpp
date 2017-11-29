@@ -5,8 +5,10 @@
 #include <ctime>
 #include <iostream>
 #include <vector>
+#include <list>
 #include <set>
 #include <unordered_map>
+#include <functional>
 
 #ifndef NDEBUG
 #define OnlineAssert(Expr, Msg) \
@@ -36,9 +38,9 @@ namespace online
     std::string url_decode(const std::string &value);
     std::unordered_map<std::string, std::string> parse_query_arguments(const std::string &url);
     std::time_t get_utc_timestamp();
-
     std::time_t parse_time(const std::string& time);
 	std::string dump_time(std::time_t time, bool includeDate = true, bool local = true);
+    bool list_files_in_directory(const std::string& directory, std::list<std::string>& files, std::function<bool(const std::string&)> predicate = nullptr);
 
 	void _assert(const std::string& expr_str, bool expr, const std::string& file, int line, const std::string& msg);
 };
