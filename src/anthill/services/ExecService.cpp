@@ -136,7 +136,14 @@ namespace online
         {
             if (callResult.isMember("result"))
             {
-                callback(true, callResult["result"].asString());
+				if (callResult.isString())
+				{
+					callback(true, callResult["result"].asString());
+				}
+				else
+				{
+					callback(true, Json::FastWriter().write(callResult["result"]));
+				}
             }
         }, [callback](int code, const std::string& reason, const std::string& data)
         {

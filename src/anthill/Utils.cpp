@@ -10,7 +10,7 @@
 #include <regex>
 
 #if defined( WIN32 ) || defined( _WIN32 )
-    //
+	#include <Windows.h>
 #else
     #include <sys/types.h>
     #include <dirent.h>
@@ -164,7 +164,7 @@ namespace online
                     std::string filename = fd.cFileName;
                     if (!predicate || predicate(filename))
                     {
-                        files.push_back(predicate);
+                        files.push_back(filename);
                     }
                 }
             }while(::FindNextFile(hFind, &fd));
