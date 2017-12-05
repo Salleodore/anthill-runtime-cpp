@@ -25,6 +25,47 @@ namespace online
         
         m_cancelled = true;
     }
+	
+	void Request::addResponseHeader(const std::string& key, const std::string& value)
+	{
+		m_responseHeaders[key] = value;
+	}
+	
+	std::string Request::getResponseHeader(const std::string& key) const
+	{
+		std::string key_ = key;
+		std::transform(key_.begin(), key_.end(), key_.begin(), ::tolower);
+		Fields::const_iterator it = m_responseHeaders.find(key_);
+
+		if (it == m_responseHeaders.end())
+		{
+			return "";
+		}
+
+		return it->second;
+	}
+
+	size_t curl_header_function(void *buffer, size_t size, size_t nitems, void *userdata)
+	{
+		size_t numbytes = size * nitems;
+		Request* request = (Request*)userdata;
+
+		std::string headerLine((char*)buffer, numbytes);
+
+		size_t index = headerLine.find(':') ;
+		if (index != std::string::npos)
+		{
+			std::string key = headerLine.substr(0, index);
+			std::string value = headerLine.substr(index + 1);
+			
+			std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+			value.erase(value.find_last_not_of(" \n\r\t")+1);
+
+			request->addResponseHeader(key, value);
+		}
+
+		return numbytes;
+	}
     
 	void Request::start()
 	{
@@ -50,6 +91,8 @@ namespace online
         }
         
         m_transport.add<CURLOPT_HTTPHEADER>(m_headers.get());
+		m_transport.add<CURLOPT_HEADERFUNCTION>(&curl_header_function);
+		m_transport.add<CURLOPT_HEADERDATA>(this);
 
 		m_transport.add<CURLOPT_URL>(m_location.c_str());
         m_transport.add<CURLOPT_FOLLOWLOCATION>(m_followRedirects ? 1L : 0L);
@@ -146,6 +189,8 @@ namespace online
 
 	void Request::done()
 	{
+		//long headersSize = m_transport.get_info<CURLINFO_HEADER_SIZE>().get();
+
 		m_result = (Request::Result)m_transport.get_info<CURLINFO_RESPONSE_CODE>().get();
         
 		if (m_result != CONNECTION_ERROR)
