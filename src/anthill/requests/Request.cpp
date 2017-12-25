@@ -251,6 +251,11 @@ namespace online
 	{
 		return m_status;
 	}
+ 
+    void Request::setPostField(const std::string& key, const std::string& value)
+    {
+        m_postFields[key] = value;
+    }
 
 	const Request::Fields& Request::getPostFields() const
 	{

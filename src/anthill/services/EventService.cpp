@@ -138,7 +138,6 @@ namespace online
     
 	void EventService::getEvents(
         const std::string& accessToken,
-        EventService::Events& outConnections,
         GetEventsCallback callback,
         int extraStartTime,
         int extraEndTime)
@@ -156,32 +155,31 @@ namespace online
                 {"extra_end_time", std::to_string(extraEndTime) },
             });
         
-			request->setOnResponse([=, &outConnections](const online::JsonRequest& request)
+			request->setOnResponse([=](const online::JsonRequest& request)
 			{
+                EventService::Events events;
+                
 				if (request.isSuccessful() && request.isResponseValueValid())
 				{
 					const Json::Value& value = request.getResponseValue();
-                 
+     
                     if (value.isMember("events"))
                     {
-                        const Json::Value& events = value["events"];
+                        const Json::Value& events_ = value["events"];
                         
-                        for (Json::ValueConstIterator it = events.begin(); it != events.end(); it++)
+                        for (Json::ValueConstIterator it = events_.begin(); it != events_.end(); it++)
                         {
 							std::string id = (*it)["id"].asString();
-
-                            outConnections.emplace(
-								std::piecewise_construct,
-								std::forward_as_tuple( id ),
-								std::forward_as_tuple( *it ) );
+       
+                            events[id] = std::make_shared<Event>(*it);
                         }
                     }
-
-					callback(*this, request.getResult(), request);
+                    
+					callback(*this, request.getResult(), request, events);
 				}
 				else
 				{
-					callback(*this, request.getResult(), request);
+					callback(*this, request.getResult(), request, events);
 				}
 			});
 		}
@@ -192,6 +190,68 @@ namespace online
 
 		request->start();
 	}
+ 
+ 
+    void EventService::addScore(
+        const std::string& eventId,
+        uint64_t score,
+        const std::string& accessToken,
+        AddEventScoreCallback callback,
+        EventLeaderboardInfo leaderboardInfo,
+        bool auto_join)
+    {
+        JsonRequestPtr request = JsonRequest::Create(
+            getLocation() + "/event/" + eventId + "/score/add",
+            Request::METHOD_POST);
+
+        if (request)
+        {
+            request->setAPIVersion(API_VERSION);
+        
+            request->setPostFields({
+                {"access_token", accessToken },
+                {"auto_join", auto_join ? "true" : "false" },
+                {"score", std::to_string(score) },
+            });
+            
+            if (leaderboardInfo.m_defined)
+            {
+                Json::Value info(Json::ValueType::objectValue);
+                
+                info["display_name"] = leaderboardInfo.m_displayName;
+                info["expire_in"] = (Json::UInt64)leaderboardInfo.m_expireIn;
+                
+                request->setPostField("leaderboard_info", Json::FastWriter().write(info));
+            }
+        
+            request->setOnResponse([=](const online::JsonRequest& request)
+            {
+                if (request.isSuccessful() && request.isResponseValueValid())
+                {
+                    const Json::Value& value = request.getResponseValue();
+                    
+                    uint64_t updatedScore = 0;
+     
+                    if (value.isMember("score"))
+                    {
+                        updatedScore = value["score"].asUInt64();
+                    }
+                    
+                    callback(*this, request.getResult(), request, updatedScore);
+                }
+                else
+                {
+                    callback(*this, request.getResult(), request, 0);
+                }
+            });
+        }
+        else
+        {
+            OnlineAssert(false, "Failed to construct a request.");
+        }
+
+        request->start();
+    }
 
 	EventService::~EventService()
 	{
