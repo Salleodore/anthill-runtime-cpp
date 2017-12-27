@@ -68,7 +68,7 @@ namespace online
             AnthillRuntime& online = AnthillRuntime::Instance();
             StoragePtr storage = online.getStorage();
 
-            storage->remove(CheckUserState::StorageAccessTokeneField);
+            storage->remove(Storage::StorageAccessTokeneField);
             storage->save();
 
             switchTo<CheckUserState>();

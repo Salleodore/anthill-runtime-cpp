@@ -1,6 +1,6 @@
 
 #include "anthill/states/DiscoverServicesState.h"
-#include "anthill/states/CheckUserState.h"
+#include "anthill/states/CheckExternalAuthenticationState.h"
 #include "anthill/states/StateMachine.h"
 #include "anthill/Log.h"
 #include "anthill/Utils.h"
@@ -58,12 +58,12 @@ namespace online
 		{
 			listener->servicesDiscovered([this]
 			{
-				switchTo<CheckUserState>();
+				switchTo<CheckExternalAuthenticationState>();
 			});
 		}
 		else
 		{
-			switchTo<CheckUserState>();
+			switchTo<CheckExternalAuthenticationState>();
 		}
 	}
 

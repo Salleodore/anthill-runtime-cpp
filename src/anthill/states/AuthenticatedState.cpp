@@ -20,8 +20,8 @@ namespace online
 		AnthillRuntime& online = AnthillRuntime::Instance();
 		StoragePtr storage = online.getStorage();
 
-		std::string username = storage->get(CheckUserState::StorageUsernameField);
-		std::string password = storage->get(CheckUserState::StoragePasswordField);
+		std::string username = storage->get(Storage::StorageUsernameField);
+		std::string password = storage->get(Storage::StoragePasswordField);
 
 		const ApplicationInfo& info = online.getApplicationInfo();
 

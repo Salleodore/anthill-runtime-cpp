@@ -6,16 +6,14 @@
 #include "anthill/states/StateMachine.h"
 #include "anthill/Log.h"
 #include "anthill/Utils.h"
+#include "anthill/Storage.h"
 #include "anthill/AnthillRuntime.h"
 
 using namespace std::placeholders;
 
 namespace online
 {
-	const std::string CheckUserState::StorageUsernameField = "online-username";
-	const std::string CheckUserState::StoragePasswordField = "online-password";
-	const std::string CheckUserState::StorageAccessTokeneField = "online-access-token";
-    
+
     bool CheckUserState::s_doAuthenticate = true;
 
 	CheckUserState::CheckUserState(std::shared_ptr<StateMachine> stateMachine) :
@@ -37,13 +35,13 @@ namespace online
 		AnthillRuntime& online = AnthillRuntime::Instance();
 		StoragePtr storage = online.getStorage();
 
-		if (storage->has(StorageUsernameField) && storage->has(StoragePasswordField))
+		if (storage->has(Storage::StorageUsernameField) && storage->has(Storage::StoragePasswordField))
 		{
-			if (storage->has(StorageAccessTokeneField))
+			if (storage->has(Storage::StorageAccessTokeneField))
 			{
 				Log::get() << "Validating access token." << std::endl;
 
-				std::string accessToken = storage->get(StorageAccessTokeneField);
+				std::string accessToken = storage->get(Storage::StorageAccessTokeneField);
                 ptr->setCurrentAccessToken(accessToken);
 				switchTo<ValidateTokenState>(accessToken);
 			}

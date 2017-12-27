@@ -15,10 +15,6 @@ namespace online
 	class CheckUserState : public AuthenticatedState
 	{
 		friend class StateMachine;
-	public:
-		static const std::string StorageUsernameField;
-		static const std::string StoragePasswordField;
-		static const std::string StorageAccessTokeneField;
 
 	public:
 		CheckUserState(std::shared_ptr<StateMachine> stateMachine);

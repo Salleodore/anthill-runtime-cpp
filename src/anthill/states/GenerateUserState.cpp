@@ -27,8 +27,8 @@ namespace online
 		AnthillRuntime& online = AnthillRuntime::Instance();
 		StoragePtr storage = online.getStorage();
 
-		storage->set(CheckUserState::StorageUsernameField, username);
-		storage->set(CheckUserState::StoragePasswordField, password);
+		storage->set(Storage::StorageUsernameField, username);
+		storage->set(Storage::StoragePasswordField, password);
 
 		storage->save();
 

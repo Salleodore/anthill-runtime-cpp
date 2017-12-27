@@ -22,7 +22,12 @@ namespace online
 	LoginService::LoginService(const std::string& location) :
 		Service(location)
 	{
-		
+		const ListenerPtr& onlineListener = AnthillRuntime::Instance().getListener();
+
+		if (onlineListener && onlineListener->shouldHaveExternalAuthenticator())
+		{
+			setExternalAuthenticator(onlineListener->createExternalAuthenticator());
+		}
 	}
 
     void LoginService::extend(
@@ -626,6 +631,57 @@ namespace online
 		}
 
 		request->start();
+	}
+		
+	bool LoginService::hasExternalAuthenticator() const
+	{
+		return (bool)m_externalAuthenticator;
+	}
+	
+	bool LoginService::authenticateExternally(
+		const std::string& gamespace,
+		const LoginService::Scopes& scopes,
+		const Request::Fields& other,
+		LoginService::AuthenticationCallback callback,
+		LoginService::MergeRequiredCallback mergeRequiredCallback,
+        const LoginService::Scopes& shouldHaveScopes)
+	{
+		if (!m_externalAuthenticator)
+			return false;
+
+		m_externalAuthenticator->authenticate(
+			*this,
+			gamespace,
+			scopes,
+			other,
+			callback,
+			mergeRequiredCallback,
+			shouldHaveScopes);
+
+		return true;
+	}
+		
+	bool LoginService::attachExternally(
+		const std::string& gamespace,
+		const LoginService::Scopes& scopes,
+		const Request::Fields& other,
+		LoginService::AuthenticationCallback callback,
+		LoginService::MergeRequiredCallback mergeRequiredCallback,
+        const LoginService::Scopes& shouldHaveScopes)
+	{
+		if (!m_externalAuthenticator)
+			return false;
+
+		m_externalAuthenticator->attach(
+			*this,
+			gamespace,
+			scopes,
+			other,
+			callback,
+			mergeRequiredCallback,
+			shouldHaveScopes);
+		
+		return true;
 	}
 
 	void LoginService::validateAccessToken(ValidationCallback callback)

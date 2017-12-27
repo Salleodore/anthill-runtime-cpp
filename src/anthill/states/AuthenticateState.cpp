@@ -66,7 +66,7 @@ namespace online
 				listener->authenticated(account, credential, scopes);
 			}
 
-			storage->set(CheckUserState::StorageAccessTokeneField, accessToken);
+			storage->set(Storage::StorageAccessTokeneField, accessToken);
 			storage->save();
 
 			proceed();
