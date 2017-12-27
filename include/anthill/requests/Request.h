@@ -45,6 +45,8 @@ namespace online
 			FORBIDDEN = 403,
 			NOT_FOUND = 404,
             NOT_ACCEPTABLE = 406,
+			LOCKED = 423,
+			TOO_MANY_REQUESTS = 429,
 			INTERNAL_ERROR = 500,
 
 			MISSING_RESPONSE_FIELDS = 597,
@@ -71,6 +73,7 @@ namespace online
 		void setResult(Result result);
 		Result getResult() const;
 
+        void setPostField(const std::string& key, const std::string& value);
 		void setPostFields(const Fields& fields);
 		const Fields& getPostFields() const;
   
@@ -81,8 +84,11 @@ namespace online
 		const Fields& getRequestArguments() const;
   
         void setAPIVersion(const std::string& APIVersion);
-  
         void setFollowRedirects(bool followRedirects);
+
+		void addResponseHeader(const std::string& key, const std::string& value);
+		std::string getResponseHeader(const std::string& key) const;
+		const Fields& getResponseHeaders() const { return m_responseHeaders; }
 
 		bool isSuccessful() const;
 		static bool isSuccessful(Result result);
@@ -117,7 +123,8 @@ namespace online
 		std::string m_location;
 		std::string m_responseContentType;
         std::string m_APIVersion;
-
+		
+		Fields m_responseHeaders;
 		Fields m_arguments;
 		Fields m_postFields;
 		Result m_result;
