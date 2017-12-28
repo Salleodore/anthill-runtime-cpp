@@ -73,7 +73,6 @@ namespace online
 		void setResult(Result result);
 		Result getResult() const;
 
-        void setPostField(const std::string& key, const std::string& value);
 		void setPostFields(const Fields& fields);
 		const Fields& getPostFields() const;
   
