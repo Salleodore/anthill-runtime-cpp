@@ -16,6 +16,8 @@ namespace online
     typedef std::shared_ptr< class LeaderboardService > LeaderboardServicePtr;
     
     class AnthillRuntime;
+	
+    typedef std::shared_ptr< class LeaderboardEntry > LeaderboardEntryPtr;
 
 	class LeaderboardEntry
 	{
@@ -38,7 +40,7 @@ namespace online
         Json::Value m_profile;
 	};
     
-    typedef std::list<LeaderboardEntry> LeaderboardEntries;
+    typedef std::list<LeaderboardEntryPtr> LeaderboardEntries;
     
     class LeaderboardService : public Service
     {
@@ -51,7 +53,7 @@ namespace online
             const Request& request) > DeleteLeaderboardEntryCallback;
         
 		typedef std::function< void(const LeaderboardService& service, Request::Result result,
-            const Request& request) > GetLeaderboardEntriesCallback;
+            const Request& request, const LeaderboardEntries& entries) > GetLeaderboardEntriesCallback;
         
     public:
         static const std::string ID;
@@ -62,7 +64,6 @@ namespace online
         virtual ~LeaderboardService();
         
 		void getLeaderboardEntries(const std::string& name, const std::string& order,
-            LeaderboardEntries& outEntries,
 			const std::string& accessToken, GetLeaderboardEntriesCallback callback);
         
 		void deleteLeaderboardEntry(const std::string& name, const std::string& order,

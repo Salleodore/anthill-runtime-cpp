@@ -52,7 +52,8 @@ namespace online
         bool hasTournament() const { return m_tournament; }
         const std::string& getLeaderboardName() const { return m_leaderboardName; }
         const std::string& getLeaderboardOrder() const { return m_leaderboardOrder; }
-        
+        int getTournamentResult() const { return m_tournamentResult; }
+
         EventTime getTimeStart() const { return m_timeStart; }
         EventTime getTimeEnd() const { return m_timeEnd; }
         int getTimeLeftSeconds() const;
@@ -77,6 +78,7 @@ namespace online
         bool m_tournament;
         std::string m_leaderboardName;
         std::string m_leaderboardOrder;
+		int m_tournamentResult;
 	};
 
 	class EventService : public Service

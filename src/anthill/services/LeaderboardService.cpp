@@ -42,7 +42,6 @@ namespace online
 
 	
     void LeaderboardService::getLeaderboardEntries(const std::string& name, const std::string& order,
-        LeaderboardEntries& outEntries,
         const std::string& accessToken, GetLeaderboardEntriesCallback callback)
     {
         JsonRequestPtr request = JsonRequest::Create(getLocation() + "/leaderboard/" + order + "/" + name,
@@ -56,10 +55,12 @@ namespace online
                 {"access_token", accessToken }
             });
             
-            request->setOnResponse([&outEntries, callback, this](const online::JsonRequest& request)
+            request->setOnResponse([callback, this](const online::JsonRequest& request)
             {
                 if (request.isSuccessful() && request.isResponseValueValid())
                 {
+					LeaderboardEntries entries;
+
 				    const Json::Value& value = request.getResponseValue();
                    
                     if (value.isMember("data"))
@@ -69,15 +70,15 @@ namespace online
                         for (Json::ValueConstIterator it = data.begin(); it != data.end(); it++)
                         {
                             const Json::Value& entry = *it;
-                            outEntries.emplace_back(entry);
+							entries.push_back(std::make_shared<LeaderboardEntry>(entry));
                         }
                     }
                    
-                    callback(*this, request.getResult(), request);
+                    callback(*this, request.getResult(), request, entries);
                 }
                 else
                 {
-				    callback(*this, request.getResult(), request);
+				    callback(*this, request.getResult(), request, LeaderboardEntries());
                 }
             });
         }

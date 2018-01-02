@@ -79,7 +79,20 @@ namespace online
             
             m_leaderboardName = tournament["leaderboard_name"].asString();
             m_leaderboardOrder = tournament["leaderboard_order"].asString();
+
+			if (tournament.isMember("result"))
+			{
+				m_tournamentResult = tournament["result"].asInt();
+			}
+			else
+			{
+				m_tournamentResult = 0;
+			}
         }
+		else
+		{
+			m_tournamentResult = 0;
+		}
     
         if (data.isMember("profile"))
         {
