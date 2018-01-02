@@ -128,6 +128,9 @@ namespace online
 		
 		typedef std::function< void(const SocialService& service, Request::Result result, const Request& request,
 			const SocialRequests& requests) > GetRequestsCallback;
+
+		typedef std::function< void(const SocialService& service, Request::Result result, const Request& request,
+			std::set<std::string> accountIds) > GetAccountIdsCallback;
 		
 		typedef std::function< void(const SocialService& service, Request::Result result, const Request& request,
 			const SocialUniqueNames& names) > GetUniqueNamesCallback;
@@ -159,6 +162,12 @@ namespace online
 			const std::string& accessToken,
             const std::set<std::string>& profileFields,
             GetRequestsCallback callback);
+
+		void getAccountIdsBySteamIds(
+			const std::set< std::string >& steamIds,
+			const std::string& accessToken,
+            const std::set<std::string>& profileFields,
+            GetAccountIdsCallback callback);
         
 		void addConnection(
 			const std::string& account,
