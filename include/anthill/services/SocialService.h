@@ -163,8 +163,8 @@ namespace online
             const std::set<std::string>& profileFields,
             GetRequestsCallback callback);
 
-		void getAccountIdsBySteamIds(
-			const std::set< std::string >& steamIds,
+		void getAccountIdsByCredentials(
+			const std::set< std::string >& credentials,
 			const std::string& accessToken,
             const std::set<std::string>& profileFields,
             GetAccountIdsCallback callback);

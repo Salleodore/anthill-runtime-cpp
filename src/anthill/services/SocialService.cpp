@@ -430,8 +430,8 @@ namespace online
 		request->start();
 	}
 
-	void SocialService::getAccountIdsBySteamIds(
-			const std::set< std::string >& steamIds,
+	void SocialService::getAccountIdsByCredentials(
+			const std::set< std::string >& credentials,
 			const std::string& accessToken,
             const std::set<std::string>& profileFields,
             GetAccountIdsCallback callback)
@@ -444,15 +444,21 @@ namespace online
             request->setAPIVersion(API_VERSION);
 			
             Json::Value profileFields_(Json::ValueType::arrayValue);
-            
             for (const std::string& field: profileFields)
             {
                 profileFields_.append(field);
             }
             
+            Json::Value credentials_(Json::ValueType::arrayValue);
+            for (const std::string& credential: credentials)
+            {
+                credentials_.append(credential);
+            }
+            
 			Request::Fields fields = {
                 {"access_token", accessToken },
-                {"profile_fields", Json::FastWriter().write(profileFields_)}
+                {"profile_fields", Json::FastWriter().write(profileFields_)},
+                {"credentials", Json::FastWriter().write(credentials_)}
 			};
 
 			request->setRequestArguments(fields);
