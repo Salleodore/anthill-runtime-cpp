@@ -40,7 +40,10 @@ namespace online
         
 		typedef std::function< void(const LoginService& service, Request::Result result, const Request& request,
             const Credentials& credentials) > GetCredentialsCallback;
-            
+        
+        typedef std::function< void(const LoginService& service, Request::Result result, const Request& request,
+            std::set<std::string> accountIds) > GetAccountIdsCallback;
+        
 		typedef std::function< void(const MergeOption& selectedOption) > MergeResolveCallback;
 		typedef std::function< void(const LoginService& service, const MergeOptions options, MergeResolveCallback resolve) > MergeRequiredCallback;
 
@@ -65,6 +68,11 @@ namespace online
 		void getCredentials(const std::string& accessToken, GetCredentialsCallback callback);
 		void getCredentials(GetCredentialsCallback callback);
 
+        void getAccountIdsByCredentials(
+            const std::set< std::string >& credentials,
+            const std::string& accessToken,
+            GetAccountIdsCallback callback);
+        
 		void authenticate(
 			const std::string& credentialType,
 			const std::string& gamespace,

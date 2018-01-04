@@ -4,6 +4,8 @@
 #include "anthill/AnthillRuntime.h"
 #include "anthill/Utils.h"
 
+#include "json/writer.h"
+
 namespace online
 {
 	const std::string LoginService::ID = "login";
@@ -566,6 +568,64 @@ namespace online
 		}
 
 		request->start();
+    }
+    
+    void LoginService::getAccountIdsByCredentials(
+                                                   const std::set< std::string >& credentials,
+                                                   const std::string& accessToken,
+                                                   GetAccountIdsCallback callback)
+    {
+        JsonRequestPtr request = JsonRequest::Create(
+                                                     getLocation() + "/accounts/credentials", Request::METHOD_GET);
+        
+        if (request)
+        {
+            request->setAPIVersion(API_VERSION);
+            
+            Json::Value credentials_(Json::ValueType::arrayValue);
+            for (const std::string& credential: credentials)
+            {
+                credentials_.append(credential);
+            }
+            
+            Request::Fields fields = {
+                {"access_token", accessToken },
+                {"credentials", Json::FastWriter().write(credentials_)}
+            };
+            
+            request->setRequestArguments(fields);
+            
+            request->setOnResponse([=](const online::JsonRequest& request)
+                                   {
+                                       if (request.isSuccessful() && request.isResponseValueValid())
+                                       {
+                                           const Json::Value& value = request.getResponseValue();
+                                           std::set<std::string> accountIds;
+                                           
+                                           if (value.isMember("account_ids"))
+                                           {
+                                               const Json::Value& requestsJson = value["account_ids"];
+                                               
+                                               for (Json::ValueConstIterator it = requestsJson.begin(); it != requestsJson.end(); it++)
+                                               {
+                                                   accountIds.insert( it->asString() );
+                                               }
+                                           }
+                                           
+                                           callback(*this, request.getResult(), request, accountIds);
+                                       }
+                                       else
+                                       {
+                                           callback(*this, request.getResult(), request, {});
+                                       }
+                                   });
+        }
+        else
+        {
+            OnlineAssert(false, "Failed to construct a request.");
+        }
+        
+        request->start();
     }
     
     void LoginService::getCredentials(GetCredentialsCallback callback)

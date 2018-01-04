@@ -430,66 +430,6 @@ namespace online
 		request->start();
 	}
 
-	void SocialService::getAccountIdsBySteamIds(
-			const std::set< std::string >& steamIds,
-			const std::string& accessToken,
-            const std::set<std::string>& profileFields,
-            GetAccountIdsCallback callback)
-	{
-		JsonRequestPtr request = JsonRequest::Create(
-			getLocation() + "/account_ids/steam", Request::METHOD_GET);
-
-		if (request)
-		{
-            request->setAPIVersion(API_VERSION);
-			
-            Json::Value profileFields_(Json::ValueType::arrayValue);
-            
-            for (const std::string& field: profileFields)
-            {
-                profileFields_.append(field);
-            }
-            
-			Request::Fields fields = {
-                {"access_token", accessToken },
-                {"profile_fields", Json::FastWriter().write(profileFields_)}
-			};
-
-			request->setRequestArguments(fields);
-                
-			request->setOnResponse([=](const online::JsonRequest& request)
-			{
-				if (request.isSuccessful() && request.isResponseValueValid())
-				{
-					const Json::Value& value = request.getResponseValue();
-					std::set<std::string> accountIds;
-					
-					if (value.isMember("account_ids"))
-                    {
-                        const Json::Value& requestsJson = value["account_ids"];
-                        
-                        for (Json::ValueConstIterator it = requestsJson.begin(); it != requestsJson.end(); it++)
-                        {
-							accountIds.insert( it->asString() );
-                        }
-                    }
-					                    
-					callback(*this, request.getResult(), request, accountIds);
-				}
-				else
-				{
-					callback(*this, request.getResult(), request, {});
-				}
-			});
-		}
-		else
-		{
-			OnlineAssert(false, "Failed to construct a request.");
-		}
-
-		request->start();
-	}
-
 	void SocialService::deleteConnection(
 		const std::string& account,
 		const std::string& accessToken,
