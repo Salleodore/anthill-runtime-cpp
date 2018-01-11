@@ -14,7 +14,8 @@
 
 namespace online
 {
-	typedef std::shared_ptr< class EventService > EventServicePtr;
+    typedef std::shared_ptr< class EventService > EventServicePtr;
+    typedef std::shared_ptr< class Event > EventPtr;
 
 	class AnthillRuntime;
     
@@ -80,6 +81,27 @@ namespace online
         std::string m_leaderboardOrder;
 		int m_tournamentResult;
 	};
+ 
+    struct EventLeaderboardInfo
+    {
+        EventLeaderboardInfo() :
+            m_defined(false),
+            m_displayName(""),
+            m_expireIn(0)
+        {}
+    
+        EventLeaderboardInfo(const std::string& displayName, uint64_t expireIn) :
+            m_defined(true),
+            m_displayName(displayName),
+            m_expireIn(expireIn)
+        {
+        
+        }
+    
+        bool m_defined;
+        std::string m_displayName;
+        uint64_t m_expireIn;
+    };
 
 	class EventService : public Service
 	{
@@ -89,8 +111,13 @@ namespace online
 		static const std::string ID;
         static const std::string API_VERSION;
         
-        typedef std::unordered_map<std::string, Event> Events;
-		typedef std::function< void(const EventService& service, Request::Result result, const Request& request) > GetEventsCallback;
+        typedef std::unordered_map<std::string, EventPtr> Events;
+        
+		typedef std::function< void(const EventService& service,
+            Request::Result result, const Request& request, Events& events) > GetEventsCallback;
+        
+        typedef std::function< void(const EventService& service,
+            Request::Result result, const Request& request, uint64_t updatedScore) > AddEventScoreCallback;
 
 	public:
 		static EventServicePtr Create(const std::string& location);
@@ -98,10 +125,17 @@ namespace online
 
 		void getEvents(
 			const std::string& accessToken,
-            Events& outConnections,
             GetEventsCallback callback,
             int extraStartTime = 0,
             int extraEndTime = 0);
+
+        void addScore(
+            const std::string& eventId,
+            uint64_t score,
+            const std::string& accessToken,
+            AddEventScoreCallback callback,
+            EventLeaderboardInfo leaderboardInfo = EventLeaderboardInfo(),
+            bool auto_join = true);
         
 	protected:
 		EventService(const std::string& location);
