@@ -28,7 +28,7 @@ namespace online
 						
 		lock();
 
-		ptr->authenticateExternally(info.gamespace, info.requiredScopes, {},
+		ptr->authenticateExternally(info.gamespace, info.requiredScopes, Request::Fields(),
 			[this](const LoginService& service, Request::Result result, const Request& request, const std::string& accessToken,
 				const std::string& credential,  const std::string& account, const LoginService::Scopes& scopes)
 		{
