@@ -8,6 +8,7 @@ namespace online
 {
 	class StateMachine;
 
+
 	class RetryState: public State
 	{
 		friend class StateMachine;
