@@ -18,10 +18,15 @@ namespace online
 		OnlineAssert(tryState->ID() != RetryState::ID(), "Cannot put RetryState inside of RetryState.");
 
 
+		
+	}
+
+	void RetryState::init()
+	{
 		std::weak_ptr< RetryState > weakPtr = std::static_pointer_cast< RetryState >( shared_from_this() );
 
 		AnthillRuntime::Instance().getFutures().add(
-			tryState->getRetryTime(), 
+			m_tryState->getRetryTime(), 
 			[weakPtr]()
 			{
 				std::shared_ptr< RetryState > ptr = weakPtr.lock();
@@ -32,11 +37,6 @@ namespace online
 
 				ptr->switchTo(ptr->m_tryState);
 			} );
-	}
-
-	void RetryState::init()
-	{
-		//
 	}
 
 	void RetryState::release()
