@@ -220,10 +220,14 @@ namespace online
                     if (request.isResponseValueValid())
                     {
                         const Json::Value& response = request.getResponseValue();
-                        
+                        /*
                         if (response.isMember("reply-to") && response.isMember("reply-to-class"))
                         {
                             callback(*this, request.getResult(), request, response["reply-to-class"].asString(), response["reply-to"].asString());
+                        }*/
+						if (response.isMember("reply_to"))
+                        {
+                            callback(*this, request.getResult(), request, "", "");
                         }
                         else
                         {
