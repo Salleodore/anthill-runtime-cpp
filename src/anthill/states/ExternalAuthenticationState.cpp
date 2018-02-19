@@ -18,7 +18,7 @@ namespace online
 
 	void ExternalAuthenticationState::init()
 	{
-        Log::get() << "Eexternal authentication... " << std::endl;
+        Log::get() << "External authentication... " << std::endl;
         
 		LoginServicePtr ptr = AnthillRuntime::Instance().get<LoginService>();
 		OnlineAssert((bool)ptr, "Login service is not initialized!");
@@ -36,6 +36,8 @@ namespace online
 
 			if (request.isSuccessful())
 			{
+				Log::get() << "External authentication succeeded!" << std::endl;
+
 				LoginServicePtr ptr = AnthillRuntime::Instance().get<LoginService>();
 				ptr->setCurrentAccessToken(accessToken);
 
@@ -56,11 +58,14 @@ namespace online
 			}
 			else
 			{
+				Log::get() << "External authentication failed!" << std::endl;
 				switchTo<ValidateExternalAuthenticationState>();
 			}
 		},
 			[this](const LoginService& service, const LoginService::MergeOptions options, LoginService::MergeResolveCallback resolve)
-		{      
+		{   
+			Log::get() << "Merge required!" << std::endl;
+
 			unlock();
 
 			AnthillRuntime& online = AnthillRuntime::Instance();

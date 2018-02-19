@@ -35,6 +35,8 @@ namespace online
 
 			if (request.isSuccessful())
 			{
+				Log::get() << "External credential attached!" << std::endl;
+
 				LoginServicePtr ptr = AnthillRuntime::Instance().get<LoginService>();
 				ptr->setCurrentAccessToken(accessToken);
 
@@ -55,6 +57,8 @@ namespace online
 			}
 			else
 			{
+				Log::get() << "External credential failed!" << std::endl;
+
 				switchTo<ValidateExternalAuthenticationState>();
 			}
 		},

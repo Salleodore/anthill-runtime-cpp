@@ -55,6 +55,9 @@ namespace online
 
 					if (parsed.getCredentialType() != authenticator->getCredentialType())
 					{
+						Log::get() << "Credential types don't match! ";
+						Log::get() << "Parsed credential type=" << parsed.getCredentialType();
+						Log::get() << "External credential type=" << authenticator->getCredentialType() << std::endl;
 						switchTo<AttachExternalAuthenticationState>();
 						return;
 					}
@@ -76,6 +79,10 @@ namespace online
 						complete();
 						return;
 					}
+					else
+					{
+						Log::get() << "Required scopes are not satisfied!" << std::endl;
+					}
 				}
    
 				Log::get() << "Access token is invalid!" << std::endl;
@@ -93,6 +100,8 @@ namespace online
 		}
 		else
 		{
+			Log::get() << "Access token is not found." << std::endl;
+
 			switchTo<ExternalAuthenticationState>();
 		}
 	}
