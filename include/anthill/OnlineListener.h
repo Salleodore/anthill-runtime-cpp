@@ -41,6 +41,11 @@ namespace online
 		{
 			return nullptr;
 		}
+
+		virtual bool shouldSaveExternalStorageAccessToken()
+		{
+			return true;
+		}
 	};
 };
 

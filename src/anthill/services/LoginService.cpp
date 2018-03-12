@@ -674,12 +674,27 @@ namespace online
                         {
                             scopes.insert(it->asString());
                         }
+
+						if (scopes.empty())
+						{
+							Log::get() << "LoginService::validateAccessToken: scopes are empty!" << std::endl;
+						}
                     }
+					else
+					{
+						Log::get() << "LoginService::validateAccessToken: scopes field is not found!" << std::endl;
+					}
 
                     callback(*this, request.getResult(), request, credential, account, scopes);
                 }
                 else
                 {
+					if (!request.isSuccessful())
+						Log::get() << "LoginService::validateAccessToken: request failed!" << std::endl;
+					else
+					if (!request.isResponseValueValid())
+						Log::get() << "LoginService::validateAccessToken: request response value is not valid!" << std::endl;
+
                     callback(*this, request.getResult(), request, "", "", {});
                 }
                 

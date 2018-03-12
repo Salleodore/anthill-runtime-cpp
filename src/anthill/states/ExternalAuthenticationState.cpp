@@ -51,7 +51,14 @@ namespace online
 				AnthillRuntime& online = AnthillRuntime::Instance();
 				StoragePtr storage = online.getStorage();
 
-				storage->set(Storage::StorageAccessTokeneField, accessToken);
+				if (listener && !listener->shouldSaveExternalStorageAccessToken())
+				{
+					storage->set( Storage::StorageAccessTokeneField, std::string() );
+				}
+				else
+				{
+					storage->set( Storage::StorageAccessTokeneField, accessToken );
+				}
 				storage->save();
 
 				complete();

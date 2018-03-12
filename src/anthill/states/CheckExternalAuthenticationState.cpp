@@ -26,7 +26,7 @@ namespace online
         AnthillRuntime& online = AnthillRuntime::Instance();
         const ListenerPtr& listener = online.getListener();
 
-		if (listener->shouldHaveExternalAuthenticator())
+		if (listener && listener->shouldHaveExternalAuthenticator())
 		{
 			switchTo<ValidateExternalAuthenticationState>();
 		}
