@@ -23,6 +23,9 @@ namespace online
     class PartySession: public std::enable_shared_from_this<PartySession>
     {
     public:
+		typedef std::function<void (std::string partyId, int numMembers, int maxMembers, const Json::Value& partySettings, std::set<Json::Value> partyMembers)>
+				PartyInfoCallback;
+
         typedef std::function< void(const Json::Value& callResult) > FunctionSuccessCallback;
         typedef std::function< void(int code, const std::string& reason, const std::string& data) > FunctionFailCallback;
         
@@ -42,6 +45,7 @@ namespace online
             const Json::Value& checkMembers = Json::Value::nullSingleton(), float timeout=0);
         void startGame(const Json::Value& message, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
         
+		void handlePartyInfo(PartyInfoCallback handler);
         void handlePlayerJoined(JsonRPC::RequestHandler handler);
         void handlePlayerLeft(JsonRPC::RequestHandler handler);
         void handleGameIsAboutToStart(JsonRPC::RequestHandler handler);
@@ -101,6 +105,7 @@ namespace online
         WebsocketRPCPtr m_sockets;
         std::string m_location;
         std::unordered_map<std::string, JsonRPC::RequestHandler> m_messageHandlers;
+		PartyInfoCallback m_partyInfoHandler;
     };
 
 	class GameService : public Service

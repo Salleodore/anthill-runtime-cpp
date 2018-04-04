@@ -14,7 +14,8 @@ namespace online
     
     PartySession::PartySession(const std::string& location) :
         m_sockets(WebsocketRPC::Create()),
-        m_location(location)
+        m_location(location),
+		m_partyInfoHandler(nullptr)
     {
         m_sockets->handle("message", [=](const Json::Value& params, JsonRPC::Success success, JsonRPC::Failture failture)
         {
@@ -47,7 +48,41 @@ namespace online
             
             it->second(payload, success, failture);
         });
+		
+        m_sockets->handle("party", [=](const Json::Value& params, JsonRPC::Success success, JsonRPC::Failture failture)
+        {
+			if (!params.isMember("party_info"))
+				return;
+
+			const Json::Value& partyInfo = params["party_info"];
+
+			if (!params.isMember("party"))
+				return;
+
+			const Json::Value& party = partyInfo["party"];
+
+			std::string partyId = party["id"].asString();
+			int numMembers = party["num_members"].asInt();
+			int maxMembers = party["max_members"].asInt();
+			const Json::Value& partySettings = party["settings"];
+			
+			const Json::Value& partyMembers = partyInfo["members"];
+			std::set<Json::Value> partyMembersSet;
+
+			for (Json::ValueConstIterator it = partyMembers.begin(); it != partyMembers.end(); it++)
+			{
+				partyMembersSet.insert(*it);
+			}
+
+			if (m_partyInfoHandler)
+				m_partyInfoHandler(partyId, numMembers, maxMembers, partySettings, partyMembersSet);
+		});
     }
+	
+	void PartySession::handlePartyInfo(PartyInfoCallback handler)
+	{
+		m_partyInfoHandler = handler;
+	}
     
     void PartySession::handlePlayerJoined(JsonRPC::RequestHandler handler)
     {
