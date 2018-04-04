@@ -3,6 +3,7 @@
 #include "anthill/requests/JsonRequest.h"
 #include "anthill/AnthillRuntime.h"
 #include "anthill/Utils.h"
+#include "anthill/Log.h"
 
 #include <json/writer.h>
 
@@ -10,6 +11,363 @@ namespace online
 {
 	const std::string GameService::ID = "game";
     const std::string GameService::API_VERSION = "0.2";
+    
+    PartySession::PartySession(const std::string& location) :
+        m_sockets(WebsocketRPC::Create()),
+        m_location(location)
+    {
+        m_sockets->handle("message", [=](const Json::Value& params, JsonRPC::Success success, JsonRPC::Failture failture)
+        {
+            if (!params.isMember("message_type"))
+            {
+                failture(1400, "No message_type field", "");
+                return;
+            }
+            
+            if (!params.isMember("payload"))
+            {
+                failture(1400, "No payload field", "");
+                return;
+            }
+            
+            std::string messageType = params["message_type"].asString();
+            const Json::Value& payload = params["payload"];
+            
+            std::unordered_map<std::string, JsonRPC::RequestHandler>::const_iterator it = m_messageHandlers.find(messageType);
+            
+            if (it == m_messageHandlers.end())
+            {
+                // respond with {} if there was no handler defined
+                success(Json::Value(Json::ValueType::objectValue));
+                
+                Log() << "Warning: no handler " << messageType << " is defined for PartySession." << std::endl;
+                
+                return;
+            }
+            
+            it->second(payload, success, failture);
+        });
+    }
+    
+    void PartySession::handlePlayerJoined(JsonRPC::RequestHandler handler)
+    {
+        m_messageHandlers["player_joined"] = handler;
+    }
+    
+    void PartySession::handlePlayerLeft(JsonRPC::RequestHandler handler)
+    {
+        m_messageHandlers["player_left"] = handler;
+    }
+    
+    void PartySession::handleGameIsAboutToStart(JsonRPC::RequestHandler handler)
+    {
+        m_messageHandlers["game_starting"] = handler;
+    }
+    
+    void PartySession::handleGameStartFailed(JsonRPC::RequestHandler handler)
+    {
+        m_messageHandlers["game_start_failed"] = handler;
+    }
+    
+    void PartySession::handleGameStarted(JsonRPC::RequestHandler handler)
+    {
+        m_messageHandlers["game_started"] = handler;
+    }
+    
+    void PartySession::handleCustom(JsonRPC::RequestHandler handler)
+    {
+        m_messageHandlers["custom"] = handler;
+    }
+    
+    void PartySession::handlePartyClosed(JsonRPC::RequestHandler handler)
+    {
+        m_messageHandlers["party_closed"] = handler;
+    }
+
+    void PartySession::sendMessage(const Json::Value& payload, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout)
+    {
+        Json::Value args(Json::ValueType::objectValue);
+        
+        args["payload"] = payload;
+
+        if (!m_sockets->isConnected())
+        {
+            failture(599, "Socket is closed", "");
+            return;
+        }
+    
+        m_sockets->request("send_message", success, failture, args, timeout);
+    }
+    
+    void PartySession::closeParty(const Json::Value& message, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout)
+    {
+        Json::Value args(Json::ValueType::objectValue);
+        
+        args["message"] = message;
+
+        if (!m_sockets->isConnected())
+        {
+            failture(599, "Socket is closed", "");
+            return;
+        }
+    
+        m_sockets->request("close_party", success, failture, args, timeout);
+    }
+    
+    void PartySession::leaveParty(FunctionSuccessCallback success, FunctionFailCallback failture, float timeout)
+    {
+        Json::Value args(Json::ValueType::objectValue);
+        
+        if (!m_sockets->isConnected())
+        {
+            failture(599, "Socket is closed", "");
+            return;
+        }
+    
+        m_sockets->request("leave_party", success, failture, args, timeout);
+    }
+    
+    void PartySession::joinParty(const Json::Value& memberProfile, FunctionSuccessCallback success, FunctionFailCallback failture,
+            const Json::Value& checkMembers, float timeout)
+    {
+        Json::Value args(Json::ValueType::objectValue);
+        
+        args["member_profile"] = memberProfile;
+        
+        if (!checkMembers.isNull())
+        {
+            args["check_members"] = checkMembers;
+        }
+
+        if (!m_sockets->isConnected())
+        {
+            failture(599, "Socket is closed", "");
+            return;
+        }
+    
+        m_sockets->request("join_party", success, failture, args, timeout);
+    }
+    
+    void PartySession::startGame(const Json::Value& message, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout)
+    {
+        Json::Value args(Json::ValueType::objectValue);
+        
+        args["message"] = message;
+
+        if (!m_sockets->isConnected())
+        {
+            failture(599, "Socket is closed", "");
+            return;
+        }
+    
+        m_sockets->request("start_game", success, failture, args, timeout);
+    }
+    
+    bool PartySession::isActive() const
+    {
+        return m_sockets->isConnected();
+    }
+    
+    void PartySession::connect(
+        const std::string& accessToken,
+        const std::string& partyId,
+        SessionCreatedCallback onCreated,
+        SessionClosedCallback onClosed,
+        bool autoJoin,
+        const Json::Value& memberProfile,
+        const Json::Value& checkMembers)
+    {
+        WebsocketRPC::Options options = {
+            {"access_token", accessToken},
+            {"auto_join", autoJoin ? "true" : "false"}
+        };
+        
+        if (autoJoin)
+        {
+            if (!memberProfile.isNull())
+            {
+                options["member_profile"] = Json::FastWriter().write(memberProfile);
+            }
+            
+            if (!checkMembers.isNull())
+            {
+                options["check_members"] = Json::FastWriter().write(checkMembers);
+            }
+        }
+        
+        std::string path = m_location + "/parties/" + partyId + "/session";
+        
+        std::map<std::string, std::string> extraHeaders = {
+            {"X-Api-Version", GameService::API_VERSION}
+        };
+        
+        m_sockets->connect(path, options,
+            [=](bool success, int code)
+        {
+            if (success)
+            {
+                onCreated(*this, Request::SUCCESS);
+            }
+            else
+            {
+                onCreated(*this, (Request::Result)code);
+            }
+        }, onClosed, extraHeaders);
+    }
+    
+    void PartySession::createPartyAndConnect(
+        const std::string& accessToken,
+        const std::string& gameServerName,
+        SessionCreatedCallback onCreated,
+        SessionClosedCallback onClosed,
+        int maxMembers,
+        const Json::Value& partySettings,
+        const Json::Value& roomSettings,
+        const std::string& region,
+        bool autoStart,
+        bool autoClose,
+        const std::string& closeCallback,
+        bool autoJoin,
+        const Json::Value& memberProfile)
+    {
+        const ApplicationInfo& applicationInfo = AnthillRuntime::Instance().getApplicationInfo();
+
+        WebsocketRPC::Options options = {
+            {"access_token", accessToken},
+            {"auto_join", autoJoin ? "true" : "false"},
+            {"auto_start", autoStart ? "true" : "false"},
+            {"auto_close", autoClose ? "true" : "false"}
+        };
+        
+        if (!partySettings.isNull())
+            options["party_settings"] = Json::FastWriter().write(partySettings);
+        
+        if (!roomSettings.isNull())
+            options["room_settings"] = Json::FastWriter().write(roomSettings);
+        
+        if (autoJoin && !memberProfile.isNull())
+            options["member_profile"] = Json::FastWriter().write(memberProfile);
+        
+        if (maxMembers > 0)
+            options["maxMembers"] = std::to_string(maxMembers);
+        
+        if (!region.empty())
+            options["region"] = region;
+        
+        if (!closeCallback.empty())
+            options["close_callback"] = closeCallback;
+        
+        std::string path = m_location + "/party/create/" + applicationInfo.applicationName + "/" +
+            applicationInfo.applicationVersion + "/" + gameServerName + "/session";
+        
+        std::map<std::string, std::string> extraHeaders = {
+            {"X-Api-Version", GameService::API_VERSION}
+        };
+        
+        m_sockets->connect(path, options,
+            [=](bool success, int code)
+        {
+            if (success)
+            {
+                onCreated(*this, Request::SUCCESS);
+            }
+            else
+            {
+                onCreated(*this, (Request::Result)code);
+            }
+        }, onClosed, extraHeaders);
+    }
+    
+    void PartySession::findPartyAndConnect(
+            const std::string& accessToken,
+            const std::string& gameServerName,
+            SessionCreatedCallback onCreated,
+            SessionClosedCallback onClosed,
+            const Json::Value& partyFilter,
+            const Json::Value& memberProfile,
+            bool autoCreate,
+            int maxMembers,
+            const Json::Value& createPartySettings,
+            const Json::Value& createRoomSettings,
+            const std::string& region,
+            bool createAutoStart,
+            bool createAutoClose,
+            const std::string& createCloseCallback)
+    {
+        const ApplicationInfo& applicationInfo = AnthillRuntime::Instance().getApplicationInfo();
+
+        WebsocketRPC::Options options = {
+            {"access_token", accessToken},
+            {"party_filter", Json::FastWriter().write(partyFilter) },
+            {"auto_create", autoCreate ? "true" : "false"},
+            {"create_auto_start", createAutoStart ? "true" : "false"},
+            {"create_auto_close", createAutoClose ? "true" : "false"}
+        };
+        
+        if (autoCreate)
+        {
+    
+            if (!createPartySettings.isNull())
+                options["create_party_settings"] = Json::FastWriter().write(createPartySettings);
+            
+            if (!createRoomSettings.isNull())
+                options["create_room_settings"] = Json::FastWriter().write(createRoomSettings);
+            
+            if (!memberProfile.isNull())
+                options["member_profile"] = Json::FastWriter().write(memberProfile);
+            
+            if (maxMembers > 0)
+                options["maxMembers"] = std::to_string(maxMembers);
+            
+            if (!region.empty())
+                options["region"] = region;
+            
+            if (!createCloseCallback.empty())
+                options["create_close_callback"] = createCloseCallback;
+        }
+        
+        std::string path = m_location + "/parties/" + applicationInfo.applicationName + "/" +
+            applicationInfo.applicationVersion + "/" + gameServerName + "/session";
+        
+        std::map<std::string, std::string> extraHeaders = {
+            {"X-Api-Version", GameService::API_VERSION}
+        };
+        
+        m_sockets->connect(path, options,
+            [=](bool success, int code)
+        {
+            if (success)
+            {
+                onCreated(*this, Request::SUCCESS);
+            }
+            else
+            {
+                onCreated(*this, (Request::Result)code);
+            }
+        }, onClosed, extraHeaders);
+    }
+    
+    void PartySession::update()
+    {
+        m_sockets->update();
+    }
+    
+    void PartySession::waitForShutdown()
+    {
+        m_sockets->waitForShutdown();
+    }
+
+    void PartySession::disconnect(int code, const std::string& reason)
+    {
+        m_sockets->disconnect(code, reason);
+    }
+    
+    PartySessionPtr PartySession::Create(const std::string& location)
+    {
+        return std::make_shared<PartySession>(location);
+    }
+    
+    //////////////////////
 
 	GameServicePtr GameService::Create(const std::string& location)
 	{
@@ -164,6 +522,11 @@ namespace online
 
 		request->start();
 	}
+    
+    PartySessionPtr GameService::session()
+    {
+        return PartySession::Create(getLocation());
+    }
 
 	GameService::~GameService()
 	{
