@@ -12,11 +12,68 @@ namespace online
 	const std::string GameService::ID = "game";
     const std::string GameService::API_VERSION = "0.2";
     
-    PartySession::PartySession(const std::string& location) :
+    PartySession::PartySession(const std::string& location, const PartySession::ListenerPtr& listener) :
         m_sockets(WebsocketRPC::Create()),
         m_location(location),
-		m_partyInfoHandler(nullptr)
+		m_listener(listener)
     {
+        m_messageHandlers["player_joined"] = [=](const std::string& messageType, const Json::Value& payload)
+        {
+            m_listener->onMemberJoined(PartyMember(payload));
+        };
+        
+        m_messageHandlers["player_left"] = [=](const std::string& messageType, const Json::Value& payload)
+        {
+            m_listener->onMemberLeft(PartyMember(payload));
+        };
+        
+        m_messageHandlers["game_starting"] = [=](const std::string& messageType, const Json::Value& payload)
+        {
+            m_listener->onGameStarting(payload);
+        };
+        
+        m_messageHandlers["game_start_failed"] = [=](const std::string& messageType, const Json::Value& payload)
+        {
+            m_listener->onGameStartFailed(payload["code"].asInt(), payload["reason"].asString());
+        };
+        
+        m_messageHandlers["party_closed"] = [=](const std::string& messageType, const Json::Value& payload)
+        {
+            m_listener->onPartyClosed(payload);
+        };
+        
+        m_messageHandlers["custom"] = [=](const std::string& messageType, const Json::Value& payload)
+        {
+            m_listener->onCustomMessage(messageType, payload);
+        };
+        
+        m_messageHandlers["game_started"] = [=](const std::string& messageType, const Json::Value& payload)
+        {
+            std::string roomId = payload["id"].asString();
+            std::string slot = payload["slot"].asString();
+            std::string key = payload["key"].asString();
+
+            const Json::Value& location = payload["location"];
+            const Json::Value& roomSettings = payload["settings"];
+
+            if (roomId.empty() || key.empty() || location.isNull() || roomSettings.isNull())
+            {
+                return;
+            }
+
+            std::string host = location["host"].asString();
+            const Json::Value& portsValue = location["ports"];
+
+            std::list<int> ports;
+
+            for (Json::ValueConstIterator it = portsValue.begin(); it != portsValue.end(); it++)
+            {
+                ports.push_back(it->asInt());
+            }
+
+            m_listener->onGameStarted(roomId, slot, key, host, ports, roomSettings);
+        };
+    
         m_sockets->handle("message", [=](const Json::Value& params, JsonRPC::Success success, JsonRPC::Failture failture)
         {
             if (!params.isMember("message_type"))
@@ -34,19 +91,20 @@ namespace online
             std::string messageType = params["message_type"].asString();
             const Json::Value& payload = params["payload"];
             
-            std::unordered_map<std::string, JsonRPC::RequestHandler>::const_iterator it = m_messageHandlers.find(messageType);
+            std::unordered_map<std::string, PartyMessageHandler>::const_iterator it = m_messageHandlers.find(messageType);
             
             if (it == m_messageHandlers.end())
             {
-                // respond with {} if there was no handler defined
-                success(Json::Value(Json::ValueType::objectValue));
-                
                 Log() << "Warning: no handler " << messageType << " is defined for PartySession." << std::endl;
                 
+                // respond with {} if there was no handler defined
+                success(Json::Value(Json::ValueType::objectValue));
                 return;
             }
             
-            it->second(payload, success, failture);
+            it->second(messageType, payload);
+            
+            success(Json::Value(Json::ValueType::objectValue));
         });
 		
         m_sockets->handle("party", [=](const Json::Value& params, JsonRPC::Success success, JsonRPC::Failture failture)
@@ -59,64 +117,22 @@ namespace online
 			if (!params.isMember("party"))
 				return;
 
-			const Json::Value& party = partyInfo["party"];
+			const Json::Value& partyValue = partyInfo["party"];
+   
+            Party party(partyValue);
 
-			std::string partyId = party["id"].asString();
-			int numMembers = party["num_members"].asInt();
-			int maxMembers = party["max_members"].asInt();
-			const Json::Value& partySettings = party["settings"];
-			
 			const Json::Value& partyMembers = partyInfo["members"];
-			std::set<Json::Value> partyMembersSet;
+			std::list<PartyMember> partyMembersList;
 
 			for (Json::ValueConstIterator it = partyMembers.begin(); it != partyMembers.end(); it++)
 			{
-				partyMembersSet.insert(*it);
+				partyMembersList.emplace_back(*it);
 			}
-
-			if (m_partyInfoHandler)
-				m_partyInfoHandler(partyId, numMembers, maxMembers, partySettings, partyMembersSet);
+   
+            m_listener->onPartyInfoReceived(party, partyMembersList);
+            
+            success(Json::Value(Json::ValueType::objectValue));
 		});
-    }
-	
-	void PartySession::handlePartyInfo(PartyInfoCallback handler)
-	{
-		m_partyInfoHandler = handler;
-	}
-    
-    void PartySession::handlePlayerJoined(JsonRPC::RequestHandler handler)
-    {
-        m_messageHandlers["player_joined"] = handler;
-    }
-    
-    void PartySession::handlePlayerLeft(JsonRPC::RequestHandler handler)
-    {
-        m_messageHandlers["player_left"] = handler;
-    }
-    
-    void PartySession::handleGameIsAboutToStart(JsonRPC::RequestHandler handler)
-    {
-        m_messageHandlers["game_starting"] = handler;
-    }
-    
-    void PartySession::handleGameStartFailed(JsonRPC::RequestHandler handler)
-    {
-        m_messageHandlers["game_start_failed"] = handler;
-    }
-    
-    void PartySession::handleGameStarted(JsonRPC::RequestHandler handler)
-    {
-        m_messageHandlers["game_started"] = handler;
-    }
-    
-    void PartySession::handleCustom(JsonRPC::RequestHandler handler)
-    {
-        m_messageHandlers["custom"] = handler;
-    }
-    
-    void PartySession::handlePartyClosed(JsonRPC::RequestHandler handler)
-    {
-        m_messageHandlers["party_closed"] = handler;
     }
 
     void PartySession::sendMessage(const Json::Value& payload, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout)
@@ -397,9 +413,9 @@ namespace online
         m_sockets->disconnect(code, reason);
     }
     
-    PartySessionPtr PartySession::Create(const std::string& location)
+    PartySessionPtr PartySession::Create(const std::string& location, const PartySession::ListenerPtr& listener)
     {
-        return std::make_shared<PartySession>(location);
+        return std::make_shared<PartySession>(location, listener);
     }
     
     //////////////////////
@@ -558,9 +574,9 @@ namespace online
 		request->start();
 	}
     
-    PartySessionPtr GameService::session()
+    PartySessionPtr GameService::session(const PartySession::ListenerPtr& listener)
     {
-        return PartySession::Create(getLocation());
+        return PartySession::Create(getLocation(), listener);
     }
 
 	GameService::~GameService()

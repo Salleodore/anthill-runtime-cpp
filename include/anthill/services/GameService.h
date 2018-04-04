@@ -7,6 +7,8 @@
 #include "anthill/ApplicationInfo.h"
 #include "anthill/Websockets.h"
 
+#include <list>
+
 #include <json/value.h>
 #include "DiscoveryService.h"
 
@@ -23,8 +25,80 @@ namespace online
     class PartySession: public std::enable_shared_from_this<PartySession>
     {
     public:
-		typedef std::function<void (std::string partyId, int numMembers, int maxMembers, const Json::Value& partySettings, std::set<Json::Value> partyMembers)>
-				PartyInfoCallback;
+        struct PartyMember
+        {
+            std::string account;
+            int role;
+            Json::Value profile;
+            
+            PartyMember(const Json::Value& data)
+            {
+                account = data["account"].asString();
+                role = data["role"].asInt();
+                profile = data["profile"];
+            }
+        };
+        
+        class Party
+        {
+        public:
+
+            Party(const Json::Value& data) :
+                m_id(data["id"].asString()),
+                m_members(data["num_members"].asInt()),
+                m_maxMembers(data["max_members"].asInt()),
+                m_settings(data["settings"]) {}
+
+            const std::string& getId() const
+            {
+                return m_id;
+            }
+
+            int getMembers() const
+            {
+                return m_members;
+            }
+
+            int m_igetMaxMembers() const
+            {
+                return m_maxMembers;
+            }
+
+            const Json::Value& getSettings() const
+            {
+                return m_settings;
+            }
+            
+        private:
+            std::string m_id;
+            int m_members;
+            int m_maxMembers;
+            Json::Value m_settings;
+        };
+    
+        class Listener
+        {
+            friend class PartySession;
+            
+        protected:
+            virtual void onPartyInfoReceived(const Party& party, const std::list<PartyMember>& members) {}
+            
+            virtual void onMemberJoined(const PartyMember& partyMember) {}
+            virtual void onMemberLeft(const PartyMember& partyMember) {}
+            virtual void onGameStarting(const Json::Value& payload) {}
+            virtual void onGameStartFailed(int code, const std::string& message) {}
+            virtual void onGameStarted(const std::string& roomId, const std::string& slot, const std::string& key, const std::string& host,
+                std::list<int> ports, const Json::Value& roomSettings) {}
+            virtual void onPartyClosed(const Json::Value& payload) {}
+            virtual void onCustomMessage(const std::string& messageType, const Json::Value& payload);
+        };
+        
+        typedef std::shared_ptr< class PartySession::Listener > ListenerPtr;
+        
+    public:
+        typedef std::function<void (const std::string& messageType, const Json::Value& payload)> PartyMessageHandler;
+        
+		typedef std::function<void (std::string partyId, int numMembers, int maxMembers, const Json::Value& partySettings, std::set<Json::Value> partyMembers)> PartyInfoCallback;
 
         typedef std::function< void(const Json::Value& callResult) > FunctionSuccessCallback;
         typedef std::function< void(int code, const std::string& reason, const std::string& data) > FunctionFailCallback;
@@ -33,10 +107,10 @@ namespace online
         typedef std::function< void(int code, const std::string& reason) > SessionClosedCallback;
         
     public:
-        PartySession(const std::string& location);
+        PartySession(const std::string& location, const PartySession::ListenerPtr& listener);
         
     public:
-        static PartySessionPtr Create(const std::string& location);
+        static PartySessionPtr Create(const std::string& location, const PartySession::ListenerPtr& listener);
     
         void sendMessage(const Json::Value& payload, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
         void closeParty(const Json::Value& message, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
@@ -44,15 +118,6 @@ namespace online
         void joinParty(const Json::Value& memberProfile, FunctionSuccessCallback success, FunctionFailCallback failture,
             const Json::Value& checkMembers = Json::Value::nullSingleton(), float timeout=0);
         void startGame(const Json::Value& message, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
-        
-		void handlePartyInfo(PartyInfoCallback handler);
-        void handlePlayerJoined(JsonRPC::RequestHandler handler);
-        void handlePlayerLeft(JsonRPC::RequestHandler handler);
-        void handleGameIsAboutToStart(JsonRPC::RequestHandler handler);
-        void handleGameStartFailed(JsonRPC::RequestHandler handler);
-        void handleGameStarted(JsonRPC::RequestHandler handler);
-        void handleCustom(JsonRPC::RequestHandler handler);
-        void handlePartyClosed(JsonRPC::RequestHandler handler);
         
         void connect(
             const std::string& accessToken,
@@ -104,8 +169,8 @@ namespace online
     protected:
         WebsocketRPCPtr m_sockets;
         std::string m_location;
-        std::unordered_map<std::string, JsonRPC::RequestHandler> m_messageHandlers;
-		PartyInfoCallback m_partyInfoHandler;
+        std::unordered_map<std::string, PartyMessageHandler> m_messageHandlers;
+        PartySession::ListenerPtr m_listener;
     };
 
 	class GameService : public Service
@@ -139,7 +204,7 @@ namespace online
 
         // Opens a new party session
         // Please note this shared pointer should be stored somewhere, or the session will be terminated
-        PartySessionPtr session();
+        PartySessionPtr session(const PartySession::ListenerPtr& listener);
         
 	protected:
 		GameService(const std::string& location);
