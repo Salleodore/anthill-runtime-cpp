@@ -90,7 +90,7 @@ namespace online
             virtual void onGameStarted(const std::string& roomId, const std::string& slot, const std::string& key, const std::string& host,
                 std::list<int> ports, const Json::Value& roomSettings) {}
             virtual void onPartyClosed(const Json::Value& payload) {}
-            virtual void onCustomMessage(const std::string& messageType, const Json::Value& payload);
+            virtual void onCustomMessage(const std::string& messageType, const Json::Value& payload) {};
         };
         
         typedef std::shared_ptr< class PartySession::Listener > ListenerPtr;
