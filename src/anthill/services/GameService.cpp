@@ -108,13 +108,13 @@ namespace online
         });
 		
         m_sockets->handle("party", [=](const Json::Value& params, JsonRPC::Success success, JsonRPC::Failture failture)
-        {
+        {   
 			if (!params.isMember("party_info"))
 				return;
 
 			const Json::Value& partyInfo = params["party_info"];
 
-			if (!params.isMember("party"))
+			if (!partyInfo.isMember("party"))
 				return;
 
 			const Json::Value& partyValue = partyInfo["party"];
