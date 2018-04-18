@@ -246,7 +246,7 @@ namespace online
             }
         }
         
-        std::string path = m_location + "/parties/" + partyId + "/session";
+        std::string path = m_location + "/party/" + partyId + "/session";
         
         std::map<std::string, std::string> extraHeaders = {
             {"X-Api-Version", GameService::API_VERSION}
