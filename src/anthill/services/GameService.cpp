@@ -300,7 +300,7 @@ namespace online
             options["member_profile"] = Json::FastWriter().write(memberProfile);
         
         if (maxMembers > 0)
-            options["maxMembers"] = std::to_string(maxMembers);
+            options["max_members"] = std::to_string(maxMembers);
         
         if (!region.empty())
             options["region"] = region;
