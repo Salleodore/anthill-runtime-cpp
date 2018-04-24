@@ -268,7 +268,7 @@ namespace online
             
             request->setRequestArguments({
                 {"access_token", accessToken },
-                {"limit", _limit.str()}
+                {"limit", _limit.str() }
             });
             
 			request->setOnResponse([=](const online::JsonRequest& request)
@@ -302,6 +302,69 @@ namespace online
 				else
 				{
 					callback(*this, request.getResult(), request, "", "", std::vector<Json::Value>());
+				}
+			});
+		}
+		else
+		{
+			OnlineAssert(false, "Failed to construct a request.");
+		}
+
+		request->start();
+    }
+
+    void MessageService::readNewMessages( const std::string& accessToken, const std::string& newArg, NewMessagesCallback callback, int limit )
+    {
+        JsonRequestPtr request = JsonRequest::Create(
+			getLocation() + "/messages/with/", Request::METHOD_GET);
+        
+		if (request)
+        {
+            request->setAPIVersion(API_VERSION);
+        
+            Json::FastWriter fastWriter;
+            
+            std::stringstream _limit; _limit << limit;
+            
+            request->setRequestArguments({
+                {"access_token", accessToken },
+                {"limit", _limit.str() },
+                {"new", newArg }
+            });
+            
+			request->setOnResponse([=](const online::JsonRequest& request)
+			{
+				if (request.isSuccessful())
+				{
+					// PARSE NEW MESSAGES
+                    
+                    //const Json::Value& value = request.getResponseValue();
+                    //
+					//if (value.isMember("reply_to") && value.isMember("messages"))
+					//{
+					//	const Json::Value& replyTo = value["reply_to"];
+                    //
+                    //    std::string recipientClass = replyTo["recipient_class"].asString();
+                    //    std::string recipient = replyTo["recipient"].asString();
+                    //    const Json::Value& messages_ = value["messages"];
+                    //    
+                    //    std::vector<Json::Value> messages;
+                    //    
+                    //    for (const Json::Value& message : messages_)
+                    //    {
+                    //        messages.push_back(message);
+                    //    }
+                    //    
+					//	callback(*this, request.getResult(), request, recipientClass, recipient, messages);
+					//}
+					//else
+					//{
+					//	callback(*this, Request::MISSING_RESPONSE_FIELDS, request, "", "", std::vector<Json::Value>());
+					//}
+				}
+				else
+				{
+					callback(*this, request.getResult(), request, std::vector<std::string>());
 				}
 			});
 		}

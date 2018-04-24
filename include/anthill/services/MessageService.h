@@ -63,6 +63,8 @@ namespace online
         
 		typedef std::function< void(const MessageService& service, Request::Result result, const Request& request,
 			const std::string& replyToClass, const std::string& replyTo, const std::vector<Json::Value>& messages) > ReadMessagesCallback;
+        typedef std::function< void(const MessageService& service, Request::Result result, const Request& request,
+            const std::vector<std::string>&)> NewMessagesCallback;
 		typedef std::function< void(const MessageService& service, Request::Result result, const Request& request,
             const std::string& replyToClass, const std::string& replyTo) > JoinCallback;
         
@@ -79,6 +81,9 @@ namespace online
             
         void readRecipientMessages(const std::string& recipient,
             const std::string& accessToken, ReadMessagesCallback callback, int limit = 100);
+
+        void readNewMessages(const std::string& accessToken, const std::string& newArg, 
+            NewMessagesCallback callback, int limit = 100);
         
         void joinGroup(const std::string& groupClass, const std::string& groupKey,
             const std::string& role, const std::string& accessToken, JoinCallback callback);
