@@ -363,19 +363,14 @@ namespace online
 				{
 					// PARSE NEW MESSAGES
                     
-                    std::map< std::string, std::string > results;
+                    std::map< std::string, std::uint32_t > results;
                     const Json::Value& response = request.getResponseValue();
 
-                    const auto& members = response.getMemberNames();
-                    for( const auto& recipient : members )
+                    for( const auto& entry : response )
                     {
-                        std::string messages;
-                        for( const auto& messageId : response[recipient] )
-                        {
-                            messages.append( messageId.asString() );
-                            messages.append( "," );
-                        }
-                        results[recipient] = messages;
+                        const auto& sender = entry["message_sender"].asString();
+                        const auto newMessagesCount = entry["message_count"].asUInt();
+                        results[sender] = newMessagesCount;
                         
                     }
    
@@ -384,7 +379,7 @@ namespace online
 				}
 				else
 				{
-					callback(*this, request.getResult(), request, std::map<std::string, std::string>());
+					callback(*this, request.getResult(), request, std::map< std::string, std::uint32_t >());
 				}
 			});
 		}
