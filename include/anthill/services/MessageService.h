@@ -23,6 +23,7 @@ namespace online
 		typedef std::set<std::string> MessageFlags;
 
 		typedef std::function< void(bool success, const std::string& response) > MessageSendCallback;
+        typedef std::function< void(bool success, const std::string& response) > MessageMarkReadCallback;
 		typedef std::function< void(bool success, const std::string& reason) > ListenCallback;
 		typedef std::function< void(int code, const std::string& reason) > ConnectionClosedCallback;
 		typedef std::function< bool(const std::string& uuid, const std::string& sender, const std::string& recipientClass,
@@ -40,6 +41,8 @@ namespace online
         void send(const std::string& recipientClass, const std::string& recipient,
             const std::string& messageType, const Json::Value& message,
             const std::set<std::string>& flags, MessageSendCallback callback);
+
+        void read(const std::string& messageId, MessageMarkReadCallback callback);
         
         bool isConnected() const;
         
@@ -64,7 +67,7 @@ namespace online
 		typedef std::function< void(const MessageService& service, Request::Result result, const Request& request,
 			const std::string& replyToClass, const std::string& replyTo, const std::vector<Json::Value>& messages) > ReadMessagesCallback;
         typedef std::function< void(const MessageService& service, Request::Result result, const Request& request,
-            const std::vector<std::string>&)> NewMessagesCallback;
+            const std::map<std::string, std::string>&)> NewMessagesCallback;
 		typedef std::function< void(const MessageService& service, Request::Result result, const Request& request,
             const std::string& replyToClass, const std::string& replyTo) > JoinCallback;
         
@@ -82,7 +85,7 @@ namespace online
         void readRecipientMessages(const std::string& recipient,
             const std::string& accessToken, ReadMessagesCallback callback, int limit = 100);
 
-        void readNewMessages(const std::string& accessToken, const std::string& newArg, 
+        void readNewMessages(const std::string& accessToken, 
             NewMessagesCallback callback, int limit = 100);
         
         void joinGroup(const std::string& groupClass, const std::string& groupKey,

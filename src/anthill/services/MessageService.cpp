@@ -63,6 +63,32 @@ namespace online
                 callback(false, reason.str());
         }, args);
     }
+
+    void MessageSession::read(const std::string& messageId, MessageMarkReadCallback callback)
+    {
+        if (!isConnected())
+        {
+            callback(false, "Connection is not opened");
+            return;
+        }
+        
+        Json::Value args(Json::ValueType::objectValue);
+        
+        args["message_id"] = messageId;
+        
+        m_sockets->request("mark_as_read", [callback](const Json::Value& response)
+        {
+            if (callback)
+                callback(true, response.asString());
+        }, [callback](int code, const std::string& message, const std::string& data)
+        {
+            std::stringstream reason;
+            reason << code << " " << message << " " << data;
+            
+            if (callback)
+                callback(false, reason.str());
+        }, args);
+    }
     
     void MessageSession::listen(const std::string& accessToken, MessageSession::ListenCallback callback,
             MessageSession::ConnectionClosedCallback closed, MessageSession::MessageCallback message)
@@ -313,10 +339,10 @@ namespace online
 		request->start();
     }
 
-    void MessageService::readNewMessages( const std::string& accessToken, const std::string& newArg, NewMessagesCallback callback, int limit )
+    void MessageService::readNewMessages( const std::string& accessToken, NewMessagesCallback callback, int limit )
     {
         JsonRequestPtr request = JsonRequest::Create(
-			getLocation() + "/messages/with/", Request::METHOD_GET);
+			getLocation() + "/messages/read/new", Request::METHOD_GET);
         
 		if (request)
         {
@@ -328,8 +354,7 @@ namespace online
             
             request->setRequestArguments({
                 {"access_token", accessToken },
-                {"limit", _limit.str() },
-                {"new", newArg }
+                {"limit", _limit.str() }
             });
             
 			request->setOnResponse([=](const online::JsonRequest& request)
@@ -338,33 +363,28 @@ namespace online
 				{
 					// PARSE NEW MESSAGES
                     
-                    //const Json::Value& value = request.getResponseValue();
-                    //
-					//if (value.isMember("reply_to") && value.isMember("messages"))
-					//{
-					//	const Json::Value& replyTo = value["reply_to"];
-                    //
-                    //    std::string recipientClass = replyTo["recipient_class"].asString();
-                    //    std::string recipient = replyTo["recipient"].asString();
-                    //    const Json::Value& messages_ = value["messages"];
-                    //    
-                    //    std::vector<Json::Value> messages;
-                    //    
-                    //    for (const Json::Value& message : messages_)
-                    //    {
-                    //        messages.push_back(message);
-                    //    }
-                    //    
-					//	callback(*this, request.getResult(), request, recipientClass, recipient, messages);
-					//}
-					//else
-					//{
-					//	callback(*this, Request::MISSING_RESPONSE_FIELDS, request, "", "", std::vector<Json::Value>());
-					//}
+                    std::map< std::string, std::string > results;
+                    const Json::Value& response = request.getResponseValue();
+
+                    const auto& members = response.getMemberNames();
+                    for( const auto& recipient : members )
+                    {
+                        std::string messages;
+                        for( const auto& messageId : response[recipient] )
+                        {
+                            messages.append( messageId.asString() );
+                            messages.append( "," );
+                        }
+                        results[recipient] = messages;
+                        
+                    }
+   
+                    callback(*this, request.getResult(), request, results);
+                    
 				}
 				else
 				{
-					callback(*this, request.getResult(), request, std::vector<std::string>());
+					callback(*this, request.getResult(), request, std::map<std::string, std::string>());
 				}
 			});
 		}
