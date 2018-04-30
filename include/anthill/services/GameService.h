@@ -113,6 +113,7 @@ namespace online
         static PartySessionPtr Create(const std::string& location, const PartySession::ListenerPtr& listener);
     
         void sendMessage(const Json::Value& payload, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
+		void updateParty( const std::string& action, const Json::Value& payload, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
         void closeParty(const Json::Value& message, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
         void leaveParty(FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
         void joinParty(const Json::Value& memberProfile, FunctionSuccessCallback success, FunctionFailCallback failture,

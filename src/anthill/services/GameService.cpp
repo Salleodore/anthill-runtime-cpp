@@ -149,6 +149,27 @@ namespace online
     
         m_sockets->request("send_message", success, failture, args, timeout);
     }
+
+	void PartySession::updateParty( 
+		const std::string& action, 
+		const Json::Value& payload,
+		FunctionSuccessCallback success,
+		FunctionFailCallback failture,
+		float timeout)
+    {
+        Json::Value args(Json::ValueType::objectValue);
+        
+		args["act"] = action;
+        args["payload"] = payload;
+
+        if (!m_sockets->isConnected())
+        {
+            failture(599, "Socket is closed", "");
+            return;
+        }
+    
+        m_sockets->request("update_party", success, failture, args, timeout);
+    }
     
     void PartySession::closeParty(const Json::Value& message, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout)
     {
@@ -246,7 +267,7 @@ namespace online
             }
         }
         
-        std::string path = m_location + "/parties/" + partyId + "/session";
+        std::string path = m_location + "/party/" + partyId + "/session";
         
         std::map<std::string, std::string> extraHeaders = {
             {"X-Api-Version", GameService::API_VERSION}
@@ -300,7 +321,7 @@ namespace online
             options["member_profile"] = Json::FastWriter().write(memberProfile);
         
         if (maxMembers > 0)
-            options["maxMembers"] = std::to_string(maxMembers);
+            options["max_members"] = std::to_string(maxMembers);
         
         if (!region.empty())
             options["region"] = region;
