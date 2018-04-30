@@ -366,12 +366,17 @@ namespace online
                     std::map< std::string, std::uint32_t > results;
                     const Json::Value& response = request.getResponseValue();
 
-                    for( const auto& entry : response )
+                    const auto memberNames = response.getMemberNames();
+                    for( const auto& memberName : memberNames )
                     {
-                        const auto& sender = entry["message_sender"].asString();
-                        const auto newMessagesCount = entry["message_count"].asUInt();
-                        results[sender] = newMessagesCount;
-                        
+                        auto userMessages = response[memberName];
+                        std::uint32_t newMessagesCount = 0;
+                        for( const auto& message : userMessages )
+                        {
+                            //online::Log::get() << message.asString() << std::endl;
+                            ++newMessagesCount;
+                        }
+                        results[memberName] = newMessagesCount;
                     }
    
                     callback(*this, request.getResult(), request, results);
