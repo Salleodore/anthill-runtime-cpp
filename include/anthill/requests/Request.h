@@ -182,7 +182,7 @@ namespace online
             return "";
         }
         
-        const std::fstream& getResponse() const
+        std::fstream& getResponse() const
         {
             return m_response;
         }

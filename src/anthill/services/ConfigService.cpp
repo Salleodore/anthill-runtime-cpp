@@ -1,6 +1,7 @@
 
 #include "anthill/services/ConfigService.h"
 #include "anthill/requests/JsonRequest.h"
+#include "anthill/requests/FileRequest.h"
 #include "anthill/AnthillRuntime.h"
 #include "anthill/Utils.h"
 
@@ -13,15 +14,15 @@ namespace online
     
     ConfigServicePtr ConfigService::Create(const std::string& location)
     {
-        ConfigServicePtr _object(new ConfigService(location));
+        ConfigServicePtr _object(new ConfigService(location, "TEMP-CONFIG.zip"));
         if (!_object->init())
             return ConfigServicePtr(nullptr);
         
         return _object;
     }
     
-    ConfigService::ConfigService(const std::string& location) :
-        Service(location)
+    ConfigService::ConfigService(const std::string& location, const std::string& configFileTempLocation) :
+        Service(location), m_configFile(configFileTempLocation.c_str(), std::ios_base::beg | std::ios_base::trunc | std::ios_base::binary | std::ios_base::in | std::ios_base::out)
     {
         
 	}
@@ -36,6 +37,7 @@ namespace online
             url,
             Request::METHOD_GET);
         
+
         if (request)
         {
             request->setAPIVersion(API_VERSION);
@@ -48,28 +50,32 @@ namespace online
             {
                if (request.isSuccessful() && request.isResponseValueValid())
                {
-				   const Json::Value& value = request.getResponseValue();
-       
+				   auto& value = request.getResponseValue();
                    if (value.isMember("url"))
                    {
                        std::string url = value["url"].asString();
                        
-                       JsonRequestPtr actualConfig = JsonRequest::Create(url, Request::METHOD_GET);
+                       FileRequestPtr actualConfig = FileRequest::Create(url, Request::METHOD_GET, m_configFile);
+
+                       //JsonRequestPtr actualConfig = JsonRequest::Create(url, Request::METHOD_GET);
                        
                        if (actualConfig)
                        {
-                           actualConfig->setParseAsJsonAnyway();
+                           //actualConfig->setParseAsJsonAnyway();
                            
-                           actualConfig->setOnResponse([this, callback](const online::JsonRequest& actualConfig)
+                           actualConfig->setOnResponse([this, callback](const online::FileRequest& actualConfig)
                            {
-                               if (actualConfig.isSuccessful() && actualConfig.isResponseValueValid())
+                               if (actualConfig.isSuccessful())
                                {
-                                   const Json::Value& data = actualConfig.getResponseValue();
-                                   callback(*this, actualConfig.getResult(), actualConfig, data);
+                                   auto& data = actualConfig.getResponse();
+                                   data.seekg(std::ios_base::beg);
+                                   
+                                   std::string content = { std::istreambuf_iterator< char >(data), std::istreambuf_iterator< char >() };
+                                   callback(*this, actualConfig.getResult(), actualConfig, content);
                                }
                                else
                                {
-                                   callback(*this, Request::INTERNAL_ERROR, actualConfig, Json::Value());
+                                   callback(*this, Request::INTERNAL_ERROR, actualConfig, std::string());
                                }
                            });
                        
@@ -77,17 +83,17 @@ namespace online
                        }
                        else
                        {
-                           callback(*this, Request::INTERNAL_ERROR, request, Json::Value());
+                           callback(*this, Request::INTERNAL_ERROR, request, std::string());
                        }
                    }
                    else
                    {
-                        callback(*this, Request::INTERNAL_ERROR, request, Json::Value());
+                        callback(*this, Request::INTERNAL_ERROR, request, std::string());
                    }
                }
                else
                {
-				   callback(*this, request.getResult(), request, Json::Value());
+				   callback(*this, request.getResult(), request, std::string());
                }
             });
         }

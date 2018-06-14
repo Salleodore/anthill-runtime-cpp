@@ -21,7 +21,7 @@ namespace online
         friend class AnthillRuntime;
     public:
         typedef std::function< void(const ConfigService& service, Request::Result result, const Request& request,
-                                    const Json::Value& config) > GetConfigCallback;
+                                    const std::string& configData) > GetConfigCallback;
         
     public:
         static const std::string ID;
@@ -34,10 +34,11 @@ namespace online
         void getConfig(GetConfigCallback callback);
 
     protected:
-        ConfigService(const std::string& location);
+        ConfigService(const std::string& location, const std::string& configFileTempLocation);
         bool init();
         
     private:
+        std::fstream m_configFile;
     };
 };
 
