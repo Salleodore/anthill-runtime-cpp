@@ -67,26 +67,20 @@ namespace online
                        if (actualConfig)
                        {
                            actualConfig->setOnResponse([this, callback](const online::FileRequest& actualConfig)
-                           {
-                               if( !m_configTempStream.good() )
+                           {                               
+                               auto& dataStream = actualConfig.getResponse();
+                               if (actualConfig.isSuccessful() && dataStream.good())
                                {
-                                   m_configTempStream.close();
-                                   m_configTempStream.clear();
-                                   callback(*this, Request::CLIENT_ERROR, actualConfig, "Can't open file stream for temp config file.");
-                               }
-                               
-                               if (actualConfig.isSuccessful())
-                               {
-                                   auto& dataStream = actualConfig.getResponse();
                                    dataStream.seekg(std::ios_base::beg);
                                    
-                                   std::string content = { std::istreambuf_iterator< char >(dataStream), std::istreambuf_iterator< char >() };
-                                   m_configTempStream.close();
+                                   std::string content = { std::istreambuf_iterator<char>(dataStream), std::istreambuf_iterator<char>() };
+                                   dataStream.close();
                                    callback(*this, actualConfig.getResult(), actualConfig, content);
                                }
                                else
                                {
-                                   m_configTempStream.close();
+                                   dataStream.clear();
+                                   dataStream.close();
                                    callback(*this, Request::INTERNAL_ERROR, actualConfig, std::string());
                                }
                            });
