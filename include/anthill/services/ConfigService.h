@@ -33,12 +33,15 @@ namespace online
         
         void getConfig(GetConfigCallback callback);
 
+        void setConfigTempLocation(const std::string& configFileTempLocation);
+
     protected:
-        ConfigService(const std::string& location, const std::string& configFileTempLocation);
+        ConfigService(const std::string& location);
         bool init();
         
     private:
-        std::fstream m_configFile;
+        std::string m_configFileTempLocation;
+        std::fstream m_configTempStream;
     };
 };
 
