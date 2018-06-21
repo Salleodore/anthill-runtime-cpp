@@ -51,7 +51,8 @@ namespace online
                 {"gamespace", applicationInfo.gamespace}
             });
             
-            m_configTempStream.open(m_configFileTempLocation, std::ios_base::beg | std::ios_base::trunc | std::ios_base::binary | std::ios_base::in | std::ios_base::out);
+            m_configTempStream.open(m_configFileTempLocation, 
+                static_cast<std::ios_base::openmode>(std::ios_base::beg | std::ios_base::trunc | std::ios_base::binary | std::ios_base::in | std::ios_base::out));
 
             request->setOnResponse([this, callback](const online::JsonRequest& request)
             {
