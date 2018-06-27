@@ -141,6 +141,12 @@ namespace online
         
         args["payload"] = payload;
 
+		if( !m_sockets )
+		{
+			Log() << "Warning: no m_sockets " << std::endl;
+			return;
+		}
+
         if (!m_sockets->isConnected())
         {
             failture(599, "Socket is closed", "");
@@ -161,6 +167,12 @@ namespace online
         
 		args["act"] = action;
         args["payload"] = payload;
+		
+		if( !m_sockets )
+		{
+			Log() << "Warning: no m_sockets " << std::endl;
+			return;
+		}
 
         if (!m_sockets->isConnected())
         {
@@ -176,6 +188,12 @@ namespace online
         Json::Value args(Json::ValueType::objectValue);
         
         args["message"] = message;
+		
+		if( !m_sockets )
+		{
+			Log() << "Warning: no m_sockets " << std::endl;
+			return;
+		}
 
         if (!m_sockets->isConnected())
         {
@@ -190,6 +208,12 @@ namespace online
     {
         Json::Value args(Json::ValueType::objectValue);
         
+		if( !m_sockets )
+		{
+			Log() << "Warning: no m_sockets " << std::endl;
+			return;
+		}
+
         if (!m_sockets->isConnected())
         {
             failture(599, "Socket is closed", "");
@@ -210,6 +234,12 @@ namespace online
         {
             args["check_members"] = checkMembers;
         }
+		
+		if( !m_sockets )
+		{
+			Log() << "Warning: no m_sockets " << std::endl;
+			return;
+		}
 
         if (!m_sockets->isConnected())
         {
@@ -225,6 +255,12 @@ namespace online
         Json::Value args(Json::ValueType::objectValue);
         
         args["message"] = message;
+		
+		if( !m_sockets )
+		{
+			Log() << "Warning: no m_sockets " << std::endl;
+			return;
+		}
 
         if (!m_sockets->isConnected())
         {
