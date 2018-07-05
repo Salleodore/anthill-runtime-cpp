@@ -97,6 +97,8 @@ namespace online
 		m_transport.add<CURLOPT_URL>(m_location.c_str());
         m_transport.add<CURLOPT_FOLLOWLOCATION>(m_followRedirects ? 1L : 0L);
 
+		m_transport.add<CURLOPT_SSL_VERIFYPEER>( false );
+
 		switch (m_method)
         {
             case Request::METHOD_GET:
