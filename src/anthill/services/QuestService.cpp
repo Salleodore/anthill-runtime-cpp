@@ -18,20 +18,6 @@ namespace online
         
         std::string kind = data["kind"].asString();
         
-        if (kind == "group")
-        {
-            m_kind = Kind::group;
-        }
-        else 
-		if (kind == "account")
-        {
-            m_kind = Kind::account;
-        }
-        else
-        {
-            m_kind = Kind::unknown;
-        }
-        
         if (data.isMember("profile"))
         {
             m_profile = data["profile"];
@@ -57,9 +43,7 @@ namespace online
     
 	void QuestService::getQuests(
         const std::string& accessToken,
-        GetQuestsCallback callback,
-        int extraStartTime,
-        int extraEndTime)
+        GetQuestsCallback callback )
 	{
 		JsonRequestPtr request = JsonRequest::Create(
 			getLocation() + "/quests", Request::METHOD_GET);
@@ -69,9 +53,7 @@ namespace online
             request->setAPIVersion(API_VERSION);
         
 			request->setRequestArguments({
-                {"access_token", accessToken },
-                {"extra_start_time", std::to_string(extraStartTime) },
-                {"extra_end_time", std::to_string(extraEndTime) },
+                {"access_token", accessToken }
             });
         
 			request->setOnResponse([=](const online::JsonRequest& request)
@@ -86,7 +68,7 @@ namespace online
                     {
                         const Json::Value& quests_ = value["quests"];
                         
-                        for (Json::ValueConstIterator it = quests_.begin(); it != quests_.end(); it++)
+                        for (Json::ValueConstIterator it = quests_.begin(); it != quests_.end(); ++it)
                         {
 							std::string id = (*it)["id"].asString();
                             quests[id] = std::make_shared<Quest>(*it);
@@ -133,15 +115,6 @@ namespace online
             {
                 if (request.isSuccessful() && request.isResponseValueValid())
                 {
-                    const Json::Value& value = request.getResponseValue();
-                    
-                    uint64_t updatedScore = 0;
-     
-                    if (value.isMember("score"))
-                    {
-                        updatedScore = value["score"].asUInt64();
-                    }
-                    
                     callback(*this, request.getResult(), request);
                 }
                 else

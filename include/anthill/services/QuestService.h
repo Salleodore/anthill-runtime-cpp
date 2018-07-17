@@ -24,54 +24,18 @@ namespace online
 		friend class QuestService;
   
     public:
-        typedef time_t QuestTime;
-        
-        enum class Kind
-        {
-            account,
-            group,
-            unknown
-        };
-        
-    public:
         Quest(const Json::Value& data);
         
         const std::string& getId() const { return m_id; }
-        Kind getKind() const { return m_kind; }
-        
         const Json::Value& getData() const { return m_data; }
-        
         const Json::Value& getProfile() const { return m_profile; }
         
     private:
         std::string m_id;
-        Kind m_kind;
         Json::Value m_data;
-        
         Json::Value m_profile;
 	};
  
-    struct QuestLeaderboardInfo
-    {
-        QuestLeaderboardInfo() :
-            m_defined(false),
-            m_displayName(""),
-            m_expireIn(0)
-        {}
-    
-        QuestLeaderboardInfo(const std::string& displayName, uint64_t expireIn) :
-            m_defined(true),
-            m_displayName(displayName),
-            m_expireIn(expireIn)
-        {
-        
-        }
-    
-        bool m_defined;
-        std::string m_displayName;
-        uint64_t m_expireIn;
-    };
-
 	class QuestService : public Service
 	{
 		friend class AnthillRuntime;
@@ -94,9 +58,7 @@ namespace online
 
 		void getQuests(
 			const std::string& accessToken,
-            GetQuestsCallback callback,
-            int extraStartTime = 0,
-            int extraEndTime = 0);
+            GetQuestsCallback callback );
 
         void updatePayload(
             const std::string& questId,
