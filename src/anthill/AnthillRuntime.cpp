@@ -16,6 +16,7 @@
 #include "anthill/services/LeaderboardService.h"
 #include "anthill/services/SocialService.h"
 #include "anthill/services/EventService.h"
+#include "anthill/services/QuestService.h"
 #include "anthill/services/ReportService.h"
 
 namespace online
@@ -62,6 +63,7 @@ namespace online
         Register<LeaderboardService>();
         Register<SocialService>();
         Register<EventService>();
+        Register<QuestService>();
         Register<ReportService>();
 		
 		SetService<EnvironmentService>(environment);
