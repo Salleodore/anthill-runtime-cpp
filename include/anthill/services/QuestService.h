@@ -58,7 +58,9 @@ namespace online
 
 		void getQuests(
 			const std::string& accessToken,
-            GetQuestsCallback callback );
+            GetQuestsCallback callback,
+		std::list< std::string > ignoreGroups = std::list< std::string >(),
+		std::list< std::string > ignoreFields = std::list< std::string >() );
 
         void updatePayload(
             const std::string& questId,

@@ -43,7 +43,9 @@ namespace online
     
 	void QuestService::getQuests(
         const std::string& accessToken,
-        GetQuestsCallback callback )
+        GetQuestsCallback callback,
+		std::list< std::string > ignoreGroups,
+		std::list< std::string > ignoreFields)
 	{
 		JsonRequestPtr request = JsonRequest::Create(
 			getLocation() + "/quests", Request::METHOD_GET);
@@ -52,8 +54,18 @@ namespace online
 		{
             request->setAPIVersion(API_VERSION);
         
+			Json::Value ignoreGroup( Json::arrayValue );
+			for( std::string group : ignoreGroups )
+				ignoreGroup.append( group );
+        
+			Json::Value ignoreField( Json::arrayValue );
+			for( std::string field : ignoreFields )
+				ignoreField.append( field );
+
 			request->setRequestArguments({
-                {"access_token", accessToken }
+                {"access_token", accessToken},
+                {"ignore_groups", Json::FastWriter().write( ignoreGroup )},
+				{"ignore_fields", Json::FastWriter().write( ignoreField )}
             });
         
 			request->setOnResponse([=](const online::JsonRequest& request)
@@ -79,6 +91,7 @@ namespace online
 				}
 				else
 				{
+					Log::get() << request.getResponseAsString() << std::endl;
 					callback(*this, request.getResult(), request, quests);
 				}
 			});
@@ -98,7 +111,7 @@ namespace online
         UpdateQuestPayloadCallback callback )
     {
         JsonRequestPtr request = JsonRequest::Create(
-            getLocation() + "/quest/" + questId + "/updatePayload",
+            getLocation() + "/quest/" + questId + "/progress/update",
             Request::METHOD_POST);
 
         if (request)
@@ -106,10 +119,11 @@ namespace online
             request->setAPIVersion(API_VERSION);
         
             request->setPostFields({
-                {"access_token", accessToken }
+                {"access_token", accessToken },
+                {"auto_join", true ? "true" : "false" },
             });
 
-            request->setPostField("payload", Json::FastWriter().write(payload));
+            request->setPostField("progress", Json::FastWriter().write(payload));
             
             request->setOnResponse([=](const online::JsonRequest& request)
             {
