@@ -49,6 +49,9 @@ namespace online
 		typedef std::function< void(const QuestService& service,
             Request::Result result, const Request& request, Quests& quests) > GetQuestsCallback;
         
+		typedef std::function< void(const QuestService& service,
+            Request::Result result, const Request& request, QuestPtr& quests) > GetQuestCallback;
+        
         typedef std::function< void(const QuestService& service,
             Request::Result result, const Request& request) > UpdateQuestPayloadCallback;
 
@@ -59,8 +62,15 @@ namespace online
 		void getQuests(
 			const std::string& accessToken,
             GetQuestsCallback callback,
-		std::list< std::string > ignoreGroups = std::list< std::string >(),
-		std::list< std::string > ignoreFields = std::list< std::string >() );
+			std::list< std::string > ignoreGroups = std::list< std::string >(),
+			std::list< std::string > ignoreFields = std::list< std::string >() );
+		
+		void getQuest(
+			const std::string& id,
+			const std::string& accessToken,
+            GetQuestCallback callback,
+			std::list< std::string > ignoreGroups = std::list< std::string >(),
+			std::list< std::string > ignoreFields = std::list< std::string >() );
 
         void updatePayload(
             const std::string& questId,

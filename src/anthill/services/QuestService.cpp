@@ -104,6 +104,65 @@ namespace online
 		request->start();
 	}
  
+	void QuestService::getQuest(
+        const std::string& id,
+        const std::string& accessToken,
+        GetQuestCallback callback,
+		std::list< std::string > ignoreGroups,
+		std::list< std::string > ignoreFields)
+	{
+		JsonRequestPtr request = JsonRequest::Create(
+			getLocation() + "/quest/" + id, Request::METHOD_GET);
+
+		if (request)
+		{
+            request->setAPIVersion(API_VERSION);
+        
+			Json::Value ignoreGroup( Json::arrayValue );
+			for( std::string group : ignoreGroups )
+				ignoreGroup.append( group );
+        
+			Json::Value ignoreField( Json::arrayValue );
+			for( std::string field : ignoreFields )
+				ignoreField.append( field );
+
+			request->setRequestArguments({
+                {"access_token", accessToken},
+                {"ignore_groups", Json::FastWriter().write( ignoreGroup )},
+				{"ignore_fields", Json::FastWriter().write( ignoreField )}
+            });
+        
+			request->setOnResponse([=](const online::JsonRequest& request)
+			{
+                QuestPtr quest;
+                
+				if (request.isSuccessful() && request.isResponseValueValid())
+				{
+					const Json::Value& value = request.getResponseValue();
+     
+                    if (value.isMember("quest"))
+                    {
+                        const Json::Value& quest_ = value["quest"];
+                        quest = std::make_shared<Quest>(quest_);
+                    }
+                    
+					callback(*this, request.getResult(), request, quest);
+				}
+				else
+				{
+					Log::get() << request.getResponseAsString() << std::endl;
+					callback(*this, request.getResult(), request, quest);
+				}
+			});
+		}
+		else
+		{
+			OnlineAssert(false, "Failed to construct a request.");
+		}
+
+		request->start();
+	}
+ 
     void QuestService::updatePayload(
         const std::string& questId,
         const Json::Value& payload,
