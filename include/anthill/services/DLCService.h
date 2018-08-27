@@ -28,11 +28,18 @@ namespace online
             friend class DLCService;
         
         public:
-            Bundle(const std::string& name, long size, const std::string& url, const std::string& hash, const Json::Value& payload) :
+            Bundle(
+				const std::string& name,
+				long size,
+				const std::string& url,
+				const std::string& sha256,
+				const std::string& crc32,
+				const Json::Value& payload ) :
                 m_size(size),
                 m_name(name),
                 m_url(url),
-                m_hash(hash),
+                m_sha256(sha256),
+				m_crc32(crc32),
                 m_payload(payload)
             {
             }
@@ -40,14 +47,16 @@ namespace online
             long getSize() const { return m_size; }
             const std::string& getName() const { return m_name; }
             const std::string& getUrl() const { return m_url; }
-            const std::string& getHash() const { return m_hash; }
+            const std::string& getSHA256() const { return m_sha256; }
+			const std::string& getCRC32() const { return m_crc32; }
             const Json::Value& getPayload() const { return m_payload; }
             
         private:
             long m_size;
             std::string m_name;
             std::string m_url;
-            std::string m_hash;
+            std::string m_sha256;
+			std::string m_crc32;
             Json::Value m_payload;
         };
         
