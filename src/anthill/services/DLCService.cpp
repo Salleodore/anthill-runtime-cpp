@@ -70,11 +70,15 @@ namespace online
                             const Json::Value& value = *it;
                             
                             std::string url = value["url"].asString();
-                            std::string hash = value["hash"].asString();
+                            std::string sha256 = value["hash"].asString();
+							std::string crc32;
+							if( value.isMember( "crc32" ) )
+								crc32 = value["crc32"].asString();
+
                             long size = value["size"].asLargestInt();
                             const Json::Value& payload = value["payload"];
                             
-                            bundlesOutput.emplace_back(name, size, url, hash, payload);
+                            bundlesOutput.emplace_back(name, size, url, sha256, crc32, payload);
                         }
                     
                         callback(*this, request.getResult(), request);
