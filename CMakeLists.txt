@@ -23,7 +23,7 @@ else()
 	target_compile_features(AnthillRuntime PRIVATE cxx_range_for)
 endif()
 
-if (UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE AND NOT ANDROID)
 	target_link_libraries(AnthillRuntime curl)
 else ()
 	target_link_libraries(AnthillRuntime libcurl)
