@@ -84,7 +84,7 @@ namespace online
 			MergeRequiredCallback mergeRequiredCallback,
             const Scopes& shouldHaveScopes = {"*"});
 		
-		void LoginService::graphAuthCode(
+		void graphAuthCode(
 			const std::string& credentialType,
 			const std::string& accessToken,
 			const std::string& gamespace,
