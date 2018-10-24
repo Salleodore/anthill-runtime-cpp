@@ -263,12 +263,13 @@ namespace online
 	}
 	
 	void LoginService::graphAuthCode(
+		const std::string& credentialType,
 		const std::string& accessToken,
 		const std::string& gamespace,
 		LoginService::GraphCodeAuthCallback callback )
 	{
 		JsonRequestPtr request = JsonRequest::Create(
-			getLocation() + "/graph_auth_code", Request::METHOD_POST);
+			getLocation() + "/pre_auth/" + credentialType, Request::METHOD_POST);
 
 		if (request)
 		{

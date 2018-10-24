@@ -85,6 +85,7 @@ namespace online
             const Scopes& shouldHaveScopes = {"*"});
 		
 		void LoginService::graphAuthCode(
+			const std::string& credentialType,
 			const std::string& accessToken,
 			const std::string& gamespace,
 			LoginService::GraphCodeAuthCallback callback );
