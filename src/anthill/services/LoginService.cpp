@@ -261,7 +261,54 @@ namespace online
 
 		request->start();
 	}
+	
+	void LoginService::graphAuthCode(
+		const std::string& accessToken,
+		const std::string& gamespace,
+		LoginService::GraphCodeAuthCallback callback )
+	{
+		JsonRequestPtr request = JsonRequest::Create(
+			getLocation() + "/graph_auth_code", Request::METHOD_POST);
 
+		if (request)
+		{
+            request->setAPIVersion(API_VERSION);
+        
+			Request::Fields arguments;
+			
+			arguments["access_token"] = accessToken.c_str();
+			arguments["gamespace"] = gamespace;
+
+			request->setPostFields(arguments);
+
+			request->setOnResponse([=](const online::JsonRequest& request)
+			{
+				if (request.isSuccessful() && request.isResponseValueValid())
+				{
+					const Json::Value& value = request.getResponseValue();
+					std::string code;
+					if (value.isMember( "code" ))
+					{
+						code = value["code"].asString();
+					}
+
+					callback(*this, request.getResult(), request, code);
+				}
+				else
+				{
+					Log::get() << "graphAuthCode failed!" << std::endl;
+					callback(*this, request.getResult(), request, std::string());
+				}
+			});
+		}
+		else
+		{
+			OnlineAssert(false, "Failed to construct a request.");
+		}
+
+		request->start();
+	}
+	
 	void LoginService::attach(
 		const std::string& credentialType,
 		const std::string& gamespace,

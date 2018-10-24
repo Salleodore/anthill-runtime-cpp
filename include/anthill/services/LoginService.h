@@ -34,7 +34,9 @@ namespace online
 		typedef std::set<std::string> Scopes;
 		typedef std::set<std::string> Credentials;
 		typedef std::vector<MergeOption> MergeOptions;
-
+		
+		typedef std::function< void(const LoginService& service, Request::Result result, const Request& request, const std::string&) > GraphCodeAuthCallback;
+        
 		typedef std::function< void(const LoginService& service, Request::Result result, const Request& request,
 			const std::string& accessToken, const std::string& credential, const std::string& account, const Scopes& scopes) > AuthenticationCallback;
         
@@ -81,6 +83,11 @@ namespace online
 			AuthenticationCallback callback,
 			MergeRequiredCallback mergeRequiredCallback,
             const Scopes& shouldHaveScopes = {"*"});
+		
+		void LoginService::graphAuthCode(
+			const std::string& accessToken,
+			const std::string& gamespace,
+			LoginService::GraphCodeAuthCallback callback );
 
 		void attach(
 			const std::string& credentialType,
