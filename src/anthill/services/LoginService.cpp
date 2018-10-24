@@ -269,7 +269,7 @@ namespace online
 		LoginService::GraphCodeAuthCallback callback )
 	{
 		JsonRequestPtr request = JsonRequest::Create(
-			getLocation() + "/pre_auth/" + credentialType, Request::METHOD_POST);
+			getLocation() + "/pre_auth/" + credentialType, Request::METHOD_GET);
 
 		if (request)
 		{
