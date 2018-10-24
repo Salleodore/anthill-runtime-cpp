@@ -88,6 +88,7 @@ namespace online
 			const std::string& credentialType,
 			const std::string& accessToken,
 			const std::string& gamespace,
+			const std::string& redirectUri,
 			LoginService::GraphCodeAuthCallback callback );
 
 		void attach(

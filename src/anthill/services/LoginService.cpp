@@ -266,6 +266,7 @@ namespace online
 		const std::string& credentialType,
 		const std::string& accessToken,
 		const std::string& gamespace,
+		const std::string& redirectUri,
 		LoginService::GraphCodeAuthCallback callback )
 	{
 		JsonRequestPtr request = JsonRequest::Create(
@@ -275,12 +276,11 @@ namespace online
 		{
             request->setAPIVersion(API_VERSION);
         
-			Request::Fields arguments;
-			
-			arguments["access_token"] = accessToken.c_str();
-			arguments["gamespace"] = gamespace;
-
-			request->setPostFields(arguments);
+			request->setRequestArguments({
+                {"access_token", accessToken },
+                {"gamespace", gamespace },
+                {"redirect_uri", redirectUri }
+            });
 
 			request->setOnResponse([=](const online::JsonRequest& request)
 			{
