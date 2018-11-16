@@ -82,6 +82,9 @@ namespace online
 		// adds a request to a process loop
 		void addRequest(RequestPtr request);
 
+		const std::function< void(std::string&,std::string&) >& getGenerateGuestUserCredentialsFunction() const { return m_generateGuestUserCredentialsFunction; }
+		void setGenerateGuestUserCredentialsFunction( const std::function< void(std::string&,std::string&) >& function ){ m_generateGuestUserCredentialsFunction = function; }
+
 	protected:
 		AnthillRuntime(
 			const std::string& environment, 
@@ -101,6 +104,8 @@ namespace online
 		std::unordered_map<std::string, ServiceCreator> m_serviceCreators;
 		std::set<std::string> m_enabledServices;
 		std::unordered_map<std::string, ServicePtr> m_services;
+
+		std::function< void(std::string&,std::string&) > m_generateGuestUserCredentialsFunction;
 	};
 };
 
