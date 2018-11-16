@@ -303,6 +303,8 @@ namespace online
 				{
 					const Json::Value& value = request.getResponseValue();
 
+                    Log::get() << "RMLRESP: " << value.toStyledString() << std::endl;
+
 					if (value.isMember("reply_to") && value.isMember("messages"))
 					{
 						const Json::Value& replyTo = value["reply_to"];
@@ -365,6 +367,8 @@ namespace online
                     
                     std::map< std::string, std::uint32_t > results;
                     const Json::Value& response = request.getResponseValue();
+
+                    Log::get() << "NMRESP: " << response.toStyledString() << std::endl;
 
                     const auto memberNames = response.getMemberNames();
                     for( const auto& memberName : memberNames )
