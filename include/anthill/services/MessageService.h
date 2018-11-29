@@ -83,7 +83,7 @@ namespace online
             const std::string& accessToken, ReadMessagesCallback callback, int limit = 100);
             
         void readRecipientMessages(const std::string& recipient,
-            const std::string& accessToken, ReadMessagesCallback callback, int limit = 100);
+            const std::string& accessToken, ReadMessagesCallback callback, int limit = 40);
 
         void readNewMessages(const std::string& accessToken, 
             NewMessagesCallback callback, int limit = 100);

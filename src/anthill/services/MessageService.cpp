@@ -303,7 +303,7 @@ namespace online
 				{
 					const Json::Value& value = request.getResponseValue();
 
-                    Log::get() << "RMLRESP: " << value.toStyledString() << std::endl;
+                    //Log::get() << "RMLRESP: " << value.toStyledString() << std::endl;
 
 					if (value.isMember("reply_to") && value.isMember("messages"))
 					{
