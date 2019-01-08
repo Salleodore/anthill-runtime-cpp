@@ -52,8 +52,8 @@ namespace online
             request->setAPIVersion(API_VERSION);
         
             request->setRequestArguments({
-                {"access_token", accessToken }
-                {"limit", limit }
+                { "access_token", accessToken },
+                { "limit", std::to_string( limit ) }
             });
             
             request->setOnResponse([callback, this](const online::JsonRequest& request)
