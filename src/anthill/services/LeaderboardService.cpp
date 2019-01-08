@@ -42,7 +42,7 @@ namespace online
 
 	
     void LeaderboardService::getLeaderboardEntries(const std::string& name, const std::string& order,
-        const std::string& accessToken, GetLeaderboardEntriesCallback callback)
+        const std::string& accessToken, GetLeaderboardEntriesCallback callback, int limit)
     {
         JsonRequestPtr request = JsonRequest::Create(getLocation() + "/leaderboard/" + order + "/" + name,
             Request::METHOD_GET);
@@ -53,6 +53,7 @@ namespace online
         
             request->setRequestArguments({
                 {"access_token", accessToken }
+                {"limit", limit }
             });
             
             request->setOnResponse([callback, this](const online::JsonRequest& request)

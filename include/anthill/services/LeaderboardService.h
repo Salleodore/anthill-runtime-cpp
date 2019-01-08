@@ -64,7 +64,7 @@ namespace online
         virtual ~LeaderboardService();
         
 		void getLeaderboardEntries(const std::string& name, const std::string& order,
-			const std::string& accessToken, GetLeaderboardEntriesCallback callback);
+			const std::string& accessToken, GetLeaderboardEntriesCallback callback, int limit = 100);
         
 		void deleteLeaderboardEntry(const std::string& name, const std::string& order,
 			const std::string& accessToken, DeleteLeaderboardEntryCallback callback);
