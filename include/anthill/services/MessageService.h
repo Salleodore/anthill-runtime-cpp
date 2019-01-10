@@ -70,6 +70,7 @@ namespace online
             const std::map<std::string, std::uint32_t>&)> NewMessagesCallback;
 		typedef std::function< void(const MessageService& service, Request::Result result, const Request& request,
             const std::string& replyToClass, const std::string& replyTo) > JoinCallback;
+        typedef std::function< void(const MessageService& service, Request::Result result, const Request& request) > DeleteMessageCallback;
         
     public:
         static const std::string ID;
@@ -90,6 +91,8 @@ namespace online
         
         void joinGroup(const std::string& groupClass, const std::string& groupKey,
             const std::string& role, const std::string& accessToken, JoinCallback callback);
+
+        void deleteMessage(const std::string& messageUUID, const std::string& accessToken, DeleteMessageCallback callback);
             
         // Opens a new session
         // Please note this shared pointer should be stored somewhere, or the session will be terminated

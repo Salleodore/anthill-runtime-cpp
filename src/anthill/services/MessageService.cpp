@@ -459,6 +459,42 @@ namespace online
 
 		request->start();
     }
+
+    void MessageService::deleteMessage(const std::string& messageUUID, const std::string& accessToken, DeleteMessageCallback callback)
+    {
+        JsonRequestPtr request = JsonRequest::Create(
+			getLocation() + "/message/" + messageUUID, Request::METHOD_DELETE);
+        
+		if (request)
+        {
+            request->setAPIVersion(API_VERSION);
+            request->setPostFields({
+                {"access_token", accessToken }
+            });
+            
+			request->setOnResponse([=](const online::JsonRequest& request)
+			{
+				if (request.isSuccessful())
+				{
+                    const Json::Value& response = request.getResponseValue();
+
+                    Log::get() << "DMRESP: " << response.toStyledString() << std::endl;
+                    callback( *this, request.getResult(), request );
+				}
+				else
+				{
+					Log::get() << "Delete-message request was not successfull" << std::endl << request.getResponseAsString() << std::endl;
+                    callback( *this, request.getResult(), request );
+				}
+			});
+		}
+		else
+		{
+			OnlineAssert(false, "Failed to construct a request.");
+		}
+
+		request->start();
+    }
     
     MessageSessionPtr MessageService::session()
     {
