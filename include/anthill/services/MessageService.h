@@ -92,7 +92,7 @@ namespace online
         void joinGroup(const std::string& groupClass, const std::string& groupKey,
             const std::string& role, const std::string& accessToken, JoinCallback callback);
 
-        void deleteMessage(const std::string& messageUUID, const std::string& accessToken, DeleteMessageCallback callback);
+        void deleteMessage(const std::string& messageUUID, const std::string& reason, std::uint32_t secondsInterval, const std::string& recipient, const std::string& accessToken, DeleteMessageCallback callback);
             
         // Opens a new session
         // Please note this shared pointer should be stored somewhere, or the session will be terminated

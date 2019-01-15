@@ -460,17 +460,28 @@ namespace online
 		request->start();
     }
 
-    void MessageService::deleteMessage(const std::string& messageUUID, const std::string& accessToken, DeleteMessageCallback callback)
+    void MessageService::deleteMessage(const std::string& messageUUID, const std::string& reason, std::uint32_t secondsInterval, const std::string& recipient, const std::string& accessToken, DeleteMessageCallback callback)
     {
         JsonRequestPtr request = JsonRequest::Create(
-			getLocation() + "/message/" + messageUUID, Request::METHOD_DELETE);
+			getLocation() + "/moderation/message", Request::METHOD_DELETE);
         
+        online::Request::Fields postFields = {
+            { "access_token", accessToken },
+            { "reason", reason },
+            { "recipient", recipient }
+        };
+
+        if( secondsInterval != 0 )
+            postFields["interval"] = std::to_string( secondsInterval );
+
+        if( messageUUID.size() != 0 )
+            postFields["uuid"] = messageUUID;
+
+
 		if (request)
         {
             request->setAPIVersion(API_VERSION);
-            request->setPostFields({
-                {"access_token", accessToken }
-            });
+            request->setPostFields(postFields);
             
 			request->setOnResponse([=](const online::JsonRequest& request)
 			{
