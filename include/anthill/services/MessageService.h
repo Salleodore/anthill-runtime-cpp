@@ -71,6 +71,7 @@ namespace online
 		typedef std::function< void(const MessageService& service, Request::Result result, const Request& request,
             const std::string& replyToClass, const std::string& replyTo) > JoinCallback;
         typedef std::function< void(const MessageService& service, Request::Result result, const Request& request) > DeleteMessageCallback;
+        typedef std::function< void(const MessageService& service, Request::Result result, const Request& request) > BanStatusCallback;
         
     public:
         static const std::string ID;
@@ -93,6 +94,10 @@ namespace online
             const std::string& role, const std::string& accessToken, JoinCallback callback);
 
         void deleteMessage(const std::string& user, const std::string& messageUUID, const std::string& reason, std::uint32_t secondsInterval, const std::string& recipient, const std::string& accessToken, DeleteMessageCallback callback);
+
+        void banUser(const std::string& recipient, const std::string& user, const std::string& reason, std::uint32_t secondsInterval, const std::string& accessToken, DeleteMessageCallback callback);
+
+        void checkUserBanStatus(const std::string& user, const std::string& accessToken, BanStatusCallback callback);
             
         // Opens a new session
         // Please note this shared pointer should be stored somewhere, or the session will be terminated

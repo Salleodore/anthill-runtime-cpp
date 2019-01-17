@@ -53,7 +53,8 @@ namespace online
         m_sockets->request("send_message", [callback](const Json::Value& response)
         {
             if (callback)
-                callback(true, response.asString());
+                callback(true, response.isString() ? response.asString() : "");
+                
         }, [callback](int code, const std::string& message, const std::string& data)
         {
             std::stringstream reason;
@@ -496,6 +497,87 @@ namespace online
 				else
 				{
 					Log::get() << "Delete-message request was not successfull" << std::endl << request.getResponseAsString() << std::endl;
+                    callback( *this, request.getResult(), request );
+				}
+			});
+		}
+		else
+		{
+			OnlineAssert(false, "Failed to construct a request.");
+		}
+
+		request->start();
+    }
+
+    void MessageService::banUser(const std::string& recipient, const std::string& user, const std::string& reason, std::uint32_t secondsInterval, const std::string& accessToken, DeleteMessageCallback callback)
+    {
+        JsonRequestPtr request = JsonRequest::Create(
+			getLocation() + "/moderation/ban/" + user, Request::METHOD_POST);
+        
+        online::Request::Fields postFields = {
+            { "user", user },
+            { "access_token", accessToken },
+            { "reason", reason },
+            { "recipient", recipient },
+            { "interval", std::to_string( secondsInterval ) }
+        };
+
+		if (request)
+        {
+            request->setAPIVersion(API_VERSION);
+            request->setPostFields(postFields);
+            
+			request->setOnResponse([=](const online::JsonRequest& request)
+			{
+				if (request.isSuccessful())
+				{
+                    const Json::Value& response = request.getResponseValue();
+
+                    Log::get() << "BURESP: " << response.toStyledString() << std::endl;
+                    callback( *this, request.getResult(), request );
+				}
+				else
+				{
+					Log::get() << "Ban-user request was not successfull" << std::endl << request.getResponseAsString() << std::endl;
+                    callback( *this, request.getResult(), request );
+				}
+			});
+		}
+		else
+		{
+			OnlineAssert(false, "Failed to construct a request.");
+		}
+
+		request->start();
+    }
+
+    void MessageService::checkUserBanStatus(const std::string& user, const std::string& accessToken, BanStatusCallback callback)
+    {
+        JsonRequestPtr request = JsonRequest::Create(
+			getLocation() + "/moderation/ban/" + user, Request::METHOD_GET);
+        
+        online::Request::Fields requestFields = {
+            { "user", user },
+            { "access_token", accessToken }
+        };
+
+		if (request)
+        {
+            request->setAPIVersion(API_VERSION);
+            request->setRequestArguments(requestFields);
+            
+			request->setOnResponse([=](const online::JsonRequest& request)
+			{
+				if (request.isSuccessful())
+				{
+                    const Json::Value& response = request.getResponseValue();
+
+                    Log::get() << "BURESP: " << response.toStyledString() << std::endl;
+                    callback( *this, request.getResult(), request );
+				}
+				else
+				{
+					Log::get() << "Ban-user request was not successfull" << std::endl << request.getResponseAsString() << std::endl;
                     callback( *this, request.getResult(), request );
 				}
 			});
