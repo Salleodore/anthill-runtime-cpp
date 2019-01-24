@@ -577,7 +577,12 @@ namespace online
 				}
 				else
 				{
-					Log::get() << "Ban-user request was not successfull" << std::endl << request.getResponseAsString() << std::endl;
+                    if( request.getResult() != online::Request::NOT_FOUND )
+                    {
+                        Log::get() << "Failed to retrieve userBanStatus. Error code: " << request.getResult() << std::endl;
+                        Log::get() << "Response: " << request.getResponseAsString() << std::endl;
+                    }
+
                     callback( *this, request.getResult(), request );
 				}
 			});
