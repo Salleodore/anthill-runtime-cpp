@@ -231,6 +231,7 @@ namespace online
         
 		if (request)
         {
+			request->setName("message_group_join");
             request->setAPIVersion(API_VERSION);
         
             Json::FastWriter fastWriter;
@@ -287,6 +288,7 @@ namespace online
         
 		if (request)
         {
+			request->setName("message_with");
             request->setAPIVersion(API_VERSION);
         
             Json::FastWriter fastWriter;
@@ -349,6 +351,7 @@ namespace online
         
 		if (request)
         {
+			request->setName("message_read_new");
             request->setAPIVersion(API_VERSION);
         
             Json::FastWriter fastWriter;
@@ -408,6 +411,7 @@ namespace online
         
 		if (request)
         {
+			request->setName("message_read_group_inbox");
             request->setAPIVersion(API_VERSION);
         
             Json::FastWriter fastWriter;
@@ -482,6 +486,7 @@ namespace online
 
 		if (request)
         {
+			request->setName("message_moderation_message");
             request->setAPIVersion(API_VERSION);
             request->setPostFields(postFields);
             
@@ -524,6 +529,7 @@ namespace online
 
 		if (request)
         {
+			request->setName("message_moderation_ban");
             request->setAPIVersion(API_VERSION);
             request->setPostFields(postFields);
             
@@ -563,6 +569,7 @@ namespace online
 
 		if (request)
         {
+			request->setName("message_moderation_ban2");
             request->setAPIVersion(API_VERSION);
             request->setRequestArguments(requestFields);
             

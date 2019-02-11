@@ -45,6 +45,7 @@ namespace online
 
         if (request)
         {
+			request->setName("config");
             request->setAPIVersion(API_VERSION);
         
             request->setRequestArguments({

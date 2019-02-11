@@ -99,6 +99,9 @@ namespace online
 
 		m_transport.add<CURLOPT_SSL_VERIFYPEER>( false );
 
+		m_transport.add<CURLOPT_TIMEOUT>( 60 * 2 );
+
+
 		switch (m_method)
         {
             case Request::METHOD_GET:
@@ -237,6 +240,16 @@ namespace online
 	const std::string& Request::getResponseContentType() const
 	{
 		return m_responseContentType;
+	}
+
+	void Request::setName(const char* name)
+	{
+		m_name = name;
+	}
+
+	const char* Request::getName() const
+	{
+		return m_name;
 	}
 
 	void Request::setResult(Request::Result result)

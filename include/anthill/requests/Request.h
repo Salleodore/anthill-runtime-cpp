@@ -70,6 +70,9 @@ namespace online
 
 		void setOnResponse(ResponseCallback onResponse);
 
+		void setName(const char* name);
+		const char* getName() const;
+
 		void setResult(Result result);
 		Result getResult() const;
 
@@ -102,6 +105,7 @@ namespace online
 	protected:
 		template<class T>
         Request(const std::string& location, Method method, curl::curl_ios<T> ios) :
+			m_name(nullptr),
             m_location(location),
             m_result(NOT_INITIALIZED),
             m_method(method),
@@ -120,6 +124,7 @@ namespace online
         virtual void connectionError() = 0;
 
 	private:
+		const char* m_name;
 		std::string m_location;
 		std::string m_responseContentType;
         std::string m_APIVersion;
@@ -166,7 +171,7 @@ namespace online
         {
             m_response.clear();
             
-            Log::get() << "<Connection Error>" << std::endl;
+            Log::get() << "StringStreamRequest(" << (getName() ? getName() : "Unknown") << "): <Connection Error>" << std::endl;
             m_response << "<Connection Error>";
         }
         
@@ -196,7 +201,7 @@ namespace online
         
         virtual void connectionError() override
         {
-            Log::get() << "<Connection Error>" << std::endl;
+            Log::get() << "FileStreamRequest(" << (getName() ? getName() : "Unknown") << "): <Connection Error>" << std::endl;
         }
         
     private:

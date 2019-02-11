@@ -55,6 +55,7 @@ namespace online
         
         if (request)
         {
+			request->setName("report_upload");
             request->setAPIVersion(API_VERSION);
         
             request->setRequestArguments({
@@ -106,6 +107,7 @@ namespace online
         
         if (request)
         {
+			request->setName("report_upload2");
             request->setAPIVersion(API_VERSION);
         
             request->setRequestArguments({

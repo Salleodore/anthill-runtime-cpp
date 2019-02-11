@@ -42,6 +42,7 @@ namespace online
 			getLocation() + "/" + applicationInfo.applicationName + "/" + applicationInfo.applicationVersion, Request::METHOD_GET);
 		if (request)
 		{
+			request->setName("environment");
             request->setAPIVersion(API_VERSION);
         
 			request->setOnResponse([=](const online::JsonRequest& request)

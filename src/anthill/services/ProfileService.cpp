@@ -33,6 +33,7 @@ namespace online
         
         if (request)
         {
+			request->setName("profile_profiles");
             request->setAPIVersion(API_VERSION);
         
 			Json::Value accounts_(Json::ValueType::arrayValue);
@@ -147,6 +148,7 @@ namespace online
         
         if (request)
         {
+			request->setName("profile_profile");
             request->setAPIVersion(API_VERSION);
         
             request->setRequestArguments({
@@ -182,6 +184,7 @@ namespace online
         
         if (request)
         {
+			request->setName("profile_profile2");
             request->setAPIVersion(API_VERSION);
         
             request->setRequestArguments({

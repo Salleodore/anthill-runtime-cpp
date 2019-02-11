@@ -160,6 +160,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("events");
             request->setAPIVersion(API_VERSION);
         
 			request->setRequestArguments({
@@ -219,6 +220,7 @@ namespace online
 
         if (request)
         {
+			request->setName("event_score_add");
             request->setAPIVersion(API_VERSION);
         
             request->setPostFields({

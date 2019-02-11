@@ -43,6 +43,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("login_extend");
             request->setAPIVersion(API_VERSION);
         
 			Request::Fields arguments;
@@ -121,6 +122,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("login_auth");
             request->setAPIVersion(API_VERSION);
         
 			Request::Fields arguments = other;
@@ -274,6 +276,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("login_pre_auth");
             request->setAPIVersion(API_VERSION);
         
 			request->setRequestArguments({
@@ -324,6 +327,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("login_auth");
             request->setAPIVersion(API_VERSION);
         
 			Request::Fields arguments = other;
@@ -485,6 +489,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("login_resolve");
             request->setAPIVersion(API_VERSION);
         
 			Request::Fields arguments = other;
@@ -578,6 +583,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("login_credentials");
             request->setAPIVersion(API_VERSION);
         
 			request->setRequestArguments({
@@ -628,6 +634,7 @@ namespace online
         
         if (request)
         {
+			request->setName("login_accounts_by_credentials");
             request->setAPIVersion(API_VERSION);
             
             Json::Value credentials_(Json::ValueType::arrayValue);
@@ -688,6 +695,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("login_validate");
             request->setAPIVersion(API_VERSION);
         
 			request->setRequestArguments({

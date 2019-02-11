@@ -44,6 +44,7 @@ namespace online
         
         if (request)
         {
+			request->setName("dlc");
             request->setAPIVersion(API_VERSION);
         
             Json::FastWriter fastWriter;

@@ -217,6 +217,7 @@ namespace online
         
         if (request)
         {
+			request->setName("social_store");
             request->setAPIVersion(API_VERSION);
         
             request->setRequestArguments({

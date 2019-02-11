@@ -254,6 +254,7 @@ namespace online
         
 		if (request)
         {
+			request->setName("exec_call");
             request->setAPIVersion(API_VERSION);
         
             Json::FastWriter fastWriter;

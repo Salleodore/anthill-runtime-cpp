@@ -501,6 +501,7 @@ namespace online
         
 		if (request)
         {
+			request->setName("room_join");
             request->setAPIVersion(API_VERSION);
         
             Json::FastWriter fastWriter;
@@ -572,6 +573,7 @@ namespace online
         
 		if (request)
         {
+			request->setName("room_join2");
             request->setAPIVersion(API_VERSION);
         
             Json::FastWriter fastWriter;

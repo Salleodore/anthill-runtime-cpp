@@ -49,6 +49,7 @@ namespace online
         
         if (request)
         {
+			request->setName("leaderboard_entries");
             request->setAPIVersion(API_VERSION);
         
             request->setRequestArguments({
@@ -99,6 +100,7 @@ namespace online
         
         if (request)
         {
+			request->setName("leaderboard_delete_entry");
             request->setAPIVersion(API_VERSION);
         
             request->setOnResponse([callback, this](const online::JsonRequest& request)
@@ -134,6 +136,7 @@ namespace online
         
         if (request)
         {
+			request->setName("leaderboard_add_entry");
             request->setAPIVersion(API_VERSION);
         
             request->setOnResponse([callback, this](const online::JsonRequest& request)

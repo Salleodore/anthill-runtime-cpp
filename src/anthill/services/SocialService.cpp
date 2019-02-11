@@ -143,6 +143,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("social_connections");
             request->setAPIVersion(API_VERSION);
         
             Json::Value profileFields_(Json::ValueType::arrayValue);
@@ -210,6 +211,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("social_add_connection");
             request->setAPIVersion(API_VERSION);
 
 			Request::Fields fields = {
@@ -263,6 +265,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("social_incoming_requests");
             request->setAPIVersion(API_VERSION);
 			
             Json::Value profileFields_(Json::ValueType::arrayValue);
@@ -322,6 +325,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("social_outgoing_requests");
             request->setAPIVersion(API_VERSION);
 			
             Json::Value profileFields_(Json::ValueType::arrayValue);
@@ -381,6 +385,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("social_requests");
             request->setAPIVersion(API_VERSION);
 			
             Json::Value profileFields_(Json::ValueType::arrayValue);
@@ -441,6 +446,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("social_delete_connection");
             request->setAPIVersion(API_VERSION);
 
 			Request::Fields fields = {
@@ -477,6 +483,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("social_approve_connection");
             request->setAPIVersion(API_VERSION);
 
 			Request::Fields fields = {
@@ -515,6 +522,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("social_reject_connection");
             request->setAPIVersion(API_VERSION);
 
 			Request::Fields fields = {
@@ -554,6 +562,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("social_unique_names");
             request->setAPIVersion(API_VERSION);
             
 			Request::Fields fields = {

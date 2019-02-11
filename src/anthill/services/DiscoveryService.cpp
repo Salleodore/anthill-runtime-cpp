@@ -51,6 +51,7 @@ namespace online
 
 		if (request)
 		{
+			request->setName("services");
             request->setAPIVersion(API_VERSION);
         
 			request->setOnResponse([=](const online::JsonRequest& request)
