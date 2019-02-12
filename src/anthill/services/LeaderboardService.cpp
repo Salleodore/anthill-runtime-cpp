@@ -44,6 +44,18 @@ namespace online
     void LeaderboardService::getLeaderboardEntries(const std::string& name, const std::string& order,
         const std::string& accessToken, GetLeaderboardEntriesCallback callback, int limit)
     {
+		if( name.empty() )
+		{
+			Log::get() << "Error! getLeaderboardEntries : name is empty!";
+			return;
+		}
+			
+		if( order.empty() )
+		{
+			Log::get() << "Error! getLeaderboardEntries : order is empty!";
+			return;
+		}
+
         JsonRequestPtr request = JsonRequest::Create(getLocation() + "/leaderboard/" + order + "/" + name,
             Request::METHOD_GET);
         
