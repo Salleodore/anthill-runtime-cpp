@@ -125,6 +125,7 @@ namespace online
             
             const BillingPtr& getBilling() const { return m_billing; }
             const Json::Value& getPublicPayload() const { return m_publicPayload; }
+            const Json::Value& getOptions() const { return m_options; }
         
         private:
             std::string m_category;
@@ -132,6 +133,7 @@ namespace online
             
             BillingPtr m_billing;
             Json::Value m_publicPayload;
+            Json::Value m_options;
         };
     
     public:

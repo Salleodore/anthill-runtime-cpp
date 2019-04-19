@@ -120,6 +120,8 @@ namespace online
             m_category = data["category"].asString();
         if (data.isMember("public"))
             m_publicPayload = data["public"];
+        if (data.isMember("options"))
+            m_options = data["options"];
         
         if (data.isMember("billing"))
         {
