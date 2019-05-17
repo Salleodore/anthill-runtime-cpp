@@ -57,21 +57,27 @@ namespace online
 
             request->setOnResponse([this, callback](const online::JsonRequest& request)
             {
-               if (request.isSuccessful() && request.isResponseValueValid())
+				bool isRequestSuccessful = request.isSuccessful();
+				bool isResponseValueValid = request.isResponseValueValid();
+
+               if( isRequestSuccessful && isResponseValueValid )
                {
 				   auto& value = request.getResponseValue();
-                   if (value.isMember("url"))
+                   if( value.isMember("url") )
                    {
                        std::string url = value["url"].asString();
                        
                        FileRequestPtr actualConfig = FileRequest::Create(url, Request::METHOD_GET, m_configTempStream);
 
-                       if (actualConfig)
+                       if( actualConfig )
                        {
                            actualConfig->setOnResponse([this, callback](const online::FileRequest& actualConfig)
                            {                               
                                auto& dataStream = actualConfig.getResponse();
-                               if (actualConfig.isSuccessful() && dataStream.good())
+
+							   bool actualConfigIsSuccessful = actualConfig.isSuccessful();
+							   bool dataStreamIsGood = dataStream.good();
+                               if( actualConfigIsSuccessful && dataStreamIsGood )
                                {
                                    dataStream.seekg(std::ios_base::beg);
                                    
@@ -81,6 +87,16 @@ namespace online
                                }
                                else
                                {
+								   if( !actualConfigIsSuccessful )
+								   {
+									   Log::get() << "ERROR: Actual Config Is Unsuccessful!" << std::endl;
+								   }
+
+								   if( !dataStreamIsGood )
+								   {
+										Log::get() << "ERROR: Data Stream Is Bad!" << std::endl;
+								   }
+
                                    dataStream.clear();
                                    dataStream.close();
                                    callback(*this, Request::INTERNAL_ERROR, actualConfig, std::string());
@@ -91,16 +107,26 @@ namespace online
                        }
                        else
                        {
+						   Log::get() << "ERROR: Data Stream Is Bad!" << std::endl;
+
                            callback(*this, Request::INTERNAL_ERROR, request, std::string());
                        }
                    }
                    else
                    {
+					   Log::get() << "ERROR: Response without url!" << std::endl;
+
                         callback(*this, Request::INTERNAL_ERROR, request, std::string());
                    }
                }
                else
                {
+				   if( !isRequestSuccessful )
+					   Log::get() << "ERROR: Request is not succesful!" << std::endl;
+
+				   if( !isResponseValueValid )
+					   Log::get() << "ERROR: Response value is invalid!" << std::endl;
+
 				   callback(*this, request.getResult(), request, std::string());
                }
             });
