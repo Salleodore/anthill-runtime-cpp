@@ -47,7 +47,8 @@ namespace online
                 m_id(data["id"].asString()),
                 m_members(data["num_members"].asInt()),
                 m_maxMembers(data["max_members"].asInt()),
-                m_settings(data["settings"]) {}
+                m_settings(data["settings"]),
+                m_config(data["config"]) {}
 
             const std::string& getId() const
             {
@@ -68,12 +69,18 @@ namespace online
             {
                 return m_settings;
             }
+
+            const Json::Value& getConfig() const
+            {
+                return m_config;
+            }
             
         private:
             std::string m_id;
             int m_members;
             int m_maxMembers;
             Json::Value m_settings;
+            Json::Value m_config;
         };
     
         class Listener

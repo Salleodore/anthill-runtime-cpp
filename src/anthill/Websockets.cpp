@@ -98,6 +98,19 @@ namespace online
             // uWebSockets always returns 'message' as nullptr
             onDisconnect(code, "Disconnected");
             Log::get() << "Websocket disconnected: " << code << std::endl;
+
+			if( socket )
+			{
+				if( socket->getNodeData() )
+				{
+					if( socket->getNodeData()->recvBuffer )
+					{
+						std::string nodeData = socket->getNodeData()->recvBuffer;
+						nodeData.resize( 2307 );
+						Log::get() << "\n\nSocket Node Data: " << nodeData << std::endl << std::endl;
+					}
+				}
+			}
         });
         
         m_client.onError([this, onConnect](void *user)
