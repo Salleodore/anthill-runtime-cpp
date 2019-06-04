@@ -223,6 +223,25 @@ namespace online
         m_sockets->request("leave_party", success, failture, args, timeout);
     }
     
+    void PartySession::leavePartyByKick(FunctionSuccessCallback success, FunctionFailCallback failture, float timeout)
+    {
+        Json::Value args(Json::ValueType::objectValue);
+        
+		if( !m_sockets )
+		{
+			Log() << "Warning: no m_sockets " << std::endl;
+			return;
+		}
+
+        if (!m_sockets->isConnected())
+        {
+            failture(599, "Socket is closed", "");
+            return;
+        }
+    
+        m_sockets->request("leave_party_by_kick", success, failture, args, timeout);
+    }
+    
     void PartySession::joinParty(const Json::Value& memberProfile, FunctionSuccessCallback success, FunctionFailCallback failture,
             const Json::Value& checkMembers, float timeout)
     {
