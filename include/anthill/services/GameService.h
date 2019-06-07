@@ -123,7 +123,8 @@ namespace online
 		void updateParty( const std::string& action, const Json::Value& payload, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
         void closeParty(const Json::Value& message, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
         void leaveParty(FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
-		void leavePartyByKick(FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);		
+		void leavePartyByKick(FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);	
+	    void removeMemberFromConfig(const std::string& accountId, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
         void joinParty(const Json::Value& memberProfile, FunctionSuccessCallback success, FunctionFailCallback failture,
             const Json::Value& checkMembers = Json::Value::nullSingleton(), float timeout=0);
         void startGame(const Json::Value& message, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout=0);
@@ -134,6 +135,7 @@ namespace online
             SessionCreatedCallback onCreated,
             SessionClosedCallback onClosed,
             bool autoJoin = true,
+			bool reunion = false,
             const Json::Value& memberProfile = Json::Value::nullSingleton(),
             const Json::Value& checkMembers = Json::Value::nullSingleton());
         

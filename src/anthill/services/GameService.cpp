@@ -242,6 +242,27 @@ namespace online
         m_sockets->request("leave_party_by_kick", success, failture, args, timeout);
     }
     
+    void PartySession::removeMemberFromConfig(const std::string& accountId, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout)
+    {
+        Json::Value args(Json::ValueType::objectValue);
+        
+        args["account_id"] = accountId;
+        
+		if( !m_sockets )
+		{
+			Log() << "Warning: no m_sockets " << std::endl;
+			return;
+		}
+
+        if (!m_sockets->isConnected())
+        {
+            failture(599, "Socket is closed", "");
+            return;
+        }
+    
+        m_sockets->request("remove_member_from_config", success, failture, args, timeout);
+    }
+    
     void PartySession::joinParty(const Json::Value& memberProfile, FunctionSuccessCallback success, FunctionFailCallback failture,
             const Json::Value& checkMembers, float timeout)
     {
@@ -301,12 +322,14 @@ namespace online
         SessionCreatedCallback onCreated,
         SessionClosedCallback onClosed,
         bool autoJoin,
+        bool reunion,
         const Json::Value& memberProfile,
         const Json::Value& checkMembers)
     {
         WebsocketRPC::Options options = {
             {"access_token", accessToken},
-            {"auto_join", autoJoin ? "true" : "false"}
+            {"auto_join", autoJoin ? "true" : "false"},
+            {"reunion", reunion ? "true" : "false"}
         };
         
         if (autoJoin)
