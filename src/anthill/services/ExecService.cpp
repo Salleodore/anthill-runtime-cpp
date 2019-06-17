@@ -30,6 +30,8 @@ namespace online
     
     void ExecSession::call(const std::string& method, const Json::Value& arguments, FunctionSuccessCallback success, FunctionFailCallback failture, float timeout)
     {
+        Log::get() << "Calling method: " << method << std::endl;
+
         Json::Value args(Json::ValueType::objectValue);
         
         args["method_name"] = method;
