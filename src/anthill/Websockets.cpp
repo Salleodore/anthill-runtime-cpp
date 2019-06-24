@@ -106,8 +106,38 @@ namespace online
 					if( socket->getNodeData()->recvBuffer )
 					{
 						std::string nodeData = socket->getNodeData()->recvBuffer;
-						nodeData.resize( 2307 );
-						Log::get() << "\n\nSocket Node Data: " << nodeData << std::endl << std::endl;
+						if( nodeData.size() > 4096 )
+							nodeData.resize( 4096 );
+
+						const char charset[] =
+							"0123456789"
+							"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+							"abcdefghijklmnopqrstuvwxyz"
+							";:[]{}@`,./_?!\"#$%&'()=^~\\|*-+"
+							"\n\t";
+						auto charsetBegin = std::begin( charset );
+						auto charsetEnd = std::end( charset ) - 1;
+
+						for( std::string::iterator	it = nodeData.begin(),
+													end	= nodeData.end(); 
+													it != end; )
+						{
+							char c = (*it);
+							if( std::find( charsetBegin, charsetEnd, c ) == charsetEnd )
+							{
+								it = nodeData.erase( it );
+								end = nodeData.end();
+							}
+							else
+							{
+								++it;
+							}
+						}
+
+						Log::get() << "Socket Node Data" << std::endl;
+						Log::get() << ">>>>>" << std::endl;
+						Log::get() << "Data(" << nodeData.size() << "): " << nodeData << std::endl << std::endl;
+						Log::get() << "<<<<<" << std::endl;
 					}
 				}
 			}
