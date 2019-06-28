@@ -140,7 +140,13 @@ namespace online
 						Log::get() << "Data(" << nodeData.size() << "): " << nodeData << std::endl << std::endl;
 						Log::get() << "<<<<<" << std::endl;
 
-						AnthillRuntime::Instance().processSocketDisconnectionInfo( nodeData );
+						std::string messageStr = message;
+
+						AnthillRuntime::Instance().processSocketDisconnectionInfo( 
+							code,
+							"\ncode = " + std::to_string( code ) + 
+							"\nmessage = " + messageStr + 
+							"\nnodeData = " + nodeData );
 					}
 				}
 			}
