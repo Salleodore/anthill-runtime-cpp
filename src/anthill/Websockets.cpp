@@ -181,7 +181,10 @@ namespace online
     void WebsocketRPC::update()
     {
         uv_loop_t* loop = (uv_loop_t*)m_client.getLoop();
-        uv_run(loop, UV_RUN_NOWAIT);
+		if (loop)
+		{
+			uv_run(loop, UV_RUN_NOWAIT);
+		}
     }
 
     bool WebsocketRPC::read(std::string& data)

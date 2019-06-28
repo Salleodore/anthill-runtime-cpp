@@ -84,7 +84,8 @@ namespace online
     
     void ExecSession::update()
     {
-        m_sockets->update();
+		if (m_sockets)
+			m_sockets->update();
     }
     
 	void ExecSession::waitForShutdown()
