@@ -79,8 +79,10 @@ namespace online
                         std::string requestId = value["id"].asString();
                         callback(*this, request.getResult(), request, requestId);
                     }
-                   
-                    callback(*this, request.getResult(), request, std::string());
+					else
+					{
+						callback(*this, request.getResult(), request, std::string());
+					}
                 }
                 else
                 {
