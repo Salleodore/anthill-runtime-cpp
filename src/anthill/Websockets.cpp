@@ -142,11 +142,14 @@ namespace online
 
 						std::string messageStr = message;
 
-						AnthillRuntime::Instance().processSocketDisconnectionInfo( 
-							code,
-							"\ncode = " + std::to_string( code ) + 
-							"\nmessage = " + messageStr + 
-							"\nnodeData = " + nodeData );
+						if( AnthillRuntime::IsInstanceValid() )
+						{
+							AnthillRuntime::Instance().processSocketDisconnectionInfo( 
+								code,
+								"\ncode = " + std::to_string( code ) + 
+								"\nmessage = " + messageStr + 
+								"\nnodeData = " + nodeData );
+						}
 					}
 				}
 			}
