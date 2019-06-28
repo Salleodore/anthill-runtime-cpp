@@ -84,6 +84,14 @@ namespace online
 
 		const std::function< void(std::string&,std::string&) >& getGenerateGuestUserCredentialsFunction() const { return m_generateGuestUserCredentialsFunction; }
 		void setGenerateGuestUserCredentialsFunction( const std::function< void(std::string&,std::string&) >& function ){ m_generateGuestUserCredentialsFunction = function; }
+		
+		void setSocketDisconnectedInfoCallback( std::function< void( const std::string& ) > callback ) { m_onSocketDisconnectedInfo = callback; }
+
+		void processSocketDisconnectionInfo( const std::string& str )
+		{
+			if( m_onSocketDisconnectedInfo )
+				m_onSocketDisconnectedInfo( str );
+		}
 
 	protected:
 		AnthillRuntime(
@@ -106,6 +114,7 @@ namespace online
 		std::unordered_map<std::string, ServicePtr> m_services;
 
 		std::function< void(std::string&,std::string&) > m_generateGuestUserCredentialsFunction;
+		std::function< void( const std::string& ) > m_onSocketDisconnectedInfo;
 	};
 };
 

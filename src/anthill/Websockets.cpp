@@ -1,5 +1,6 @@
 
 #include "anthill/Utils.h"
+#include "anthill/AnthillRuntime.h"
 #include "anthill/Log.h"
 
 #include "uv.h"
@@ -138,6 +139,8 @@ namespace online
 						Log::get() << ">>>>>" << std::endl;
 						Log::get() << "Data(" << nodeData.size() << "): " << nodeData << std::endl << std::endl;
 						Log::get() << "<<<<<" << std::endl;
+
+						AnthillRuntime::Instance().processSocketDisconnectionInfo( nodeData );
 					}
 				}
 			}
