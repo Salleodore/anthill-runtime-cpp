@@ -138,10 +138,9 @@ namespace online
 						Log::get() << "Socket Node Data" << std::endl;
 						Log::get() << "Data(" << nodeData.size() << "): " << nodeData << std::endl << std::endl;
 
-						std::string messageStr = message;
-
 						if( AnthillRuntime::IsInstanceValid() )
 						{
+							std::string messageStr = message ? message : "";
 							Log::get() << "Processing disconnection info..." << std::endl;
 
 							AnthillRuntime::Instance().processSocketDisconnectionInfo( 
