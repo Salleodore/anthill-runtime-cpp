@@ -256,14 +256,14 @@ namespace online
         
         if (timeout)
         {
-            future = AnthillRuntime::Instance().getFutures().add(timeout, [this, currentId]()
+            future = AnthillRuntime::Instance().getFutures().add(timeout, [this, currentId, timeout]()
             {
                 ResponseHandlers::iterator it = m_responseHandlers.find(currentId);
                 
                 if (it == m_responseHandlers.end())
                     return;
                 
-                it->second.m_failture(599, "Request Timeout", "");
+                it->second.m_failture(599, "Request Timeout", std::to_string( timeout ));
                 m_responseHandlers.erase(it);
             });
         }
