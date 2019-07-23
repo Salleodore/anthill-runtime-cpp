@@ -65,7 +65,7 @@ namespace online
 			}
 			else
 			{
-				Log::get() << "External authentication failed!" << std::endl;
+				Log::get() << "External authentication failed!" << std::endl << request.getResponseAsString() << std::endl;
 				switchTo<ValidateExternalAuthenticationState>();
 			}
 		},
